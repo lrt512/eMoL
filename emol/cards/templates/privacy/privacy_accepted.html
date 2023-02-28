@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="row form-group">
+  <div class="col-md-12">
+    <h2>Welcome!</h2>
+  </div>
+</div>
+
+<div class="row form-group">
+  <div class="col-md-12">
+    You can now access your authorization card here:
+  </div>
+</div>
+<div class="row form-group">
+  <div class="col-md-12">
+    <a href="{{ card_url }}" target="_blank">{{ card_url }}</a>
+  </div>
+</div>
+{% if sent_email %}
+<div class="row form-group">
+  <div class="col-md-12">
+    We've also sent you an email with your card's URL.
+  </div>
+</div>
+{% endif %}
+{% endblock %}

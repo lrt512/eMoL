@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block head %}
+    {% include 'includes/datatables.html' %}
+    <script src="{% static '/cards/javascript/combatant_list.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-12 ">
+            <h2>Combatants</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-centered">
+            <table id="combatant-list" class="stripe row-border order-column" width="100%">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>SCA Name</th>
+                        <th>Legal Name</th>
+                        <th>Card ID</th>
+                        <th>Privacy</th>
+                        <th></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <div id="edit-form"></div>
+{% endblock %}

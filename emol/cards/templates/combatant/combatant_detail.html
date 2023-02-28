@@ -1,0 +1,198 @@
+<div class="modal fade" id="combatant-detail" role="dialog" data-backdrop="static">
+  <div class="modal-dialog" style="width:800px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4>
+          <span class="glyphicon glyphicon-pencil"></span>&nbsp;
+          <span id="combatant-title">New Combatant</span>
+        </h4>
+      </div>
+      <div class="modal-body">
+        <ul class="nav nav-pills">
+          <li class="active" id="info-tab"><a data-toggle="tab" href="#info">Info</a></li>
+          <li id="waiver-tab"><a data-toggle="tab" href="#waiver">Waiver</a></li>
+          {% for discipline in disciplines %}
+          <li class="discipline-tab" data-discipline="{{ discipline.slug }}">
+            <a class="discipline-tab-link" data-toggle="tab" href="#{{ discipline.slug }}">{{ discipline.name }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+        <div class="tab-content">
+          <input type="hidden" id="uuid" name="uuid" value="{% firstof combatant.uuid '' %}" />
+          <div id="info" class="tab-pane fade in active">
+            <form id="edit-combatant-form">
+              {% include 'combatant/combatant_info.html' %}
+            </form>
+          </div>
+
+          <div id="waiver" class="tab-pane fade in active">
+            <form id="waiver-date-form">
+              <div class="col-md-6">
+                <div class="form-group row">
+                  <label for="edit-waiver-date_signed" class="col-md-5 col-form-label">
+                    Date Signed&nbsp;
+                    <span
+                      title="This is the date the waiver is signed.&#013;Testing: To get a reminder email tonight, set the date for {{ test_waiver_reminder }}&#013;Testing: To get an expiry email tonight, set the date for {{ test_waiver_expiry }}">
+                      <i class="fa fa-question-circle" aria-hidden="true"></i>
+                    </span>
+                    {% if combatant %}
+                    <span title="{{combatant.waiver.reminder_tooltip}}">
+                      <i class="fa fa-envelope" aria-hidden="true"></i>
+                    </span>
+                    {% endif %}
+                  </label>
+                  <div class="col-md-5">
+                    <!-- Disable if not edit_wavier_date -->
+                    <input type="text" id="edit-waiver-date_signed" name="date_signed"
+                      value="{% firstof combatant.waiver.date_signed '' %}" class="form-control" readonly required />
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label for="edit-waiver-expiration_date" class="col-md-5 col-form-label">
+                    Expiration Date&nbsp;
+                    <span
+                      title="This is the date the waiver expiresd.&#013;Testing: To get a reminder email tonight, set the date for {{ test_waiver_reminder }}&#013;Testing: To get an expiry email tonight, set the date for {{ test_waiver_expiry }}">
+                      <i class="fa fa-question-circle" aria-hidden="true"></i>
+                    </span>
+                    {% if combatant %}
+                    <span title="{{combatant.waiver.reminder_tooltip}}">
+                      <i class="fa fa-envelope" aria-hidden="true"></i>
+                    </span>
+                    {% endif %}
+                  </label>
+                  <div class="col-md-5">
+                    <input type="text" id="edit-waiver-expiration_date" name="expiration_date"
+                      value="{% firstof combatant.waiver.expiration_date '' %}" class="form-control" readonly />
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {% for discipline in disciplines %}
+          <div id="{{ discipline.slug }}" class="tab-pane discipline-pane fade in">
+
+            <div class="row top-space-md"></div>
+            <div class="row">
+              <label class="col-md-2 col-form-label">
+                Card Issued&nbsp;
+                <span
+                  title="This is the date the card is being renewed, not two years in the future.&#013;Testing: To get a reminder email tonight, set the date for {{ test_card_reminder }}&#013;Testing: To get an expiry email tonight, set the date for {{ test_card_expiry }}">
+                  <i class="fa fa-question-circle" aria-hidden="true"></i>
+                </span>
+              </label>
+              <div class="col-md-2">
+                <!-- Disable if not edit_card_data -->
+                <input type="text" id="edit-combatant-card_issued_{{ discipline.slug }}"
+                  name="card_issued_{{ discipline.slug }}" value="{% firstof card.card_issued '' %}"
+                  class="form-control card-date" data-discipline="{{ discipline.slug }}" readonly />
+                <input type="hidden" id="edit-combatant-card_uuid_{{ discipline.slug }}"
+                  name="card_uuid_{{ discipline.slug }}" />
+
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-2"></div>
+              <div class="col-md-3">
+                {% for auth in discipline.authorizations.all %}
+                <!-- Disable if not edit_card_data -->
+                <!-- has_auth(card, auth.slug) -->
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" class="combatant-authorization" id="{{ discipline.slug}}-{{ auth.slug }}"
+                      data-endpoint="combatant-authorization" data-discipline="{{ discipline.slug }}"
+                      data-authorization="{{ auth.slug }}">
+                    {{ auth.name }}
+                  </label>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-2"></div>
+              <div class="col-md-3">
+                {% for marshal in discipline.marshals.all %}
+                <!-- Disable if not edit_card_data -->
+                <!-- has_auth(card, auth.slug) -->
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" class="combatant-marshal" id="{{ discipline.slug}}-{{ marshal.slug }}"
+                      data-endpoint="combatant-warrant" data-discipline="{{ discipline.slug }}"
+                      data-marshal="{{ marshal.slug }}">
+                    {{ marshal.name }}
+                  </label>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="clearfix"></div>
+      <div class="modal-footer">
+        <span class="modal-footer-error" id="validation-error-notice">Fix validation errors before saving</span>
+        <input type="button" class="btn btn-close" value="Close" />
+        <input type="button" class="btn btn-primary btn-save" value="Save" />
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function csrf_token() {
+    return $("[name=csrfmiddlewaretoken]").val();
+  }
+
+  $(function () {
+    $(document).ready(function () {
+      $('#edit-combatant-sca-name').focus();
+
+      // if can edit waiver date -->            
+      $("#edit-waiver-date_signed").datepicker({ format: "yyyy-mm-dd", autoclose: true })
+        .on('changeDate', function (event) {
+          var url = '/api/waiver/' + $('#uuid').val() + "/",
+            data = { date_signed: $(this).val() };
+
+          $.ajax({
+            url: url,
+            method: 'PUT',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            headers: { "X-CSRFToken": csrf_token() },
+            success: function (response, status, xhr) {
+              $("#edit-waiver-expiration_date").val(xhr.responseJSON.expiration_date);
+            }
+          });
+        });
+
+      // If can update card info
+      $(".card-date").datepicker({ format: "yyyy-mm-dd", autoclose: true })
+        .on('changeDate', function (event) {
+          var discipline = $(this).data("discipline"),
+            uuid = $("#uuid").val(),
+            url = '/api/card-date/' + uuid + "/",
+            data = {
+              card_issued: $(this).val(),
+              uuid: uuid,
+              discipline_slug: discipline,
+            };
+
+          $.ajax({
+            url: url,
+            method: 'PUT',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            headers: { "X-CSRFToken": csrf_token() },
+            success: function (response, status, xhr) {
+            }
+          });
+        });
+    });
+  });
+</script>
