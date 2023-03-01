@@ -60,7 +60,7 @@ cover/
 settings.py
 db.sqlite3
 db.sqlite3-journal
-static-media/
+static_media/
 
 # Flask stuff:
 instance/

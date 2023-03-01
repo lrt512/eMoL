@@ -39,6 +39,9 @@ class UserPermission(models.Model):
         if user.is_anonymous:
             return False
 
+        # For now, all authed users have the power
+        return True
+
         if user.is_superuser:
             return True
 
