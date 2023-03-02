@@ -22,4 +22,4 @@ class CombatantWarrant(models.Model):
     uuid = models.UUIDField(default=uuid4, editable=False)
 
     def __str__(self):
-        return f"<Warrant: {self.card.combatant.name}/{self.marshal.name} ({self.card.discipline.name})"
+        return f"<Warrant: {self.card.combatant.name} => {self.card.discipline.name}/{self.marshal.name}"

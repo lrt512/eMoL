@@ -18,4 +18,4 @@ class CombatantAuthorization(models.Model):
     uuid = models.UUIDField(default=uuid4, editable=False)
 
     def __str__(self):
-        return f"<Authorization: {self.card.combatant.name}/{self.authorization.name} ({self.card.discipline.name})"
+        return f"<Authorization: {self.card.combatant.name} => {self.card.discipline.name}/{self.authorization.name}"
