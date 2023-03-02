@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from cards.api.urls import urlpatterns as api_urlpatterns
-from cards.views import combatant, home, privacy
+from django.conf import settings
 from django.contrib.admin import site
 from django.urls import include, path
-from django.conf import settings
+
+from cards.api.urls import urlpatterns as api_urlpatterns
+from cards.views import combatant, home, privacy
 
 site.site_header = "Ealdormere eMoL"
 site.site_title = "eMoL Admin"

@@ -1,5 +1,6 @@
-from cards.utility.date import DATE_FORMAT, add_years, today
 from django.db import models
+
+from cards.utility.date import DATE_FORMAT, add_years, today
 
 from .reminder_email import ReminderEmail
 

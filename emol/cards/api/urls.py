@@ -1,7 +1,7 @@
 from django.urls import include, path, re_path
 from rest_framework import routers
 
-from .card import CardViewSet, CardDateViewSet
+from .card import CardDateViewSet, CardViewSet
 from .combatant import CombatantListViewSet, CombatantViewSet
 from .combatant_authorization import CombatantAuthorizationViewSet
 from .combatant_warrant import CombatantWarrantViewSet

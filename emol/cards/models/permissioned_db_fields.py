@@ -1,5 +1,6 @@
-from current_user import get_current_user
 from django.db import models
+
+from current_user import get_current_user
 
 
 class PermissionEnforcedField(models.Field):

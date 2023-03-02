@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 from cards.mail import send_privacy_policy
 from cards.models.combatant import Combatant
 
-
 logger = logging.getLogger("django")
 
 

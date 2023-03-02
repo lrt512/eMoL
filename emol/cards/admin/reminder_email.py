@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from cards.models.reminder_email import ReminderEmail
 from django.contrib import admin
+
+from cards.models.reminder_email import ReminderEmail
 
 __all__ = ["ReminderEmailAdmin"]
 

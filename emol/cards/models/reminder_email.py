@@ -1,12 +1,13 @@
 from datetime import timedelta
 
+from django.db import models
+
 from cards.mail import (
     send_card_expiry,
     send_card_reminder,
     send_waiver_expiry,
     send_waiver_reminder,
 )
-from django.db import models
 
 
 class ReminderEmail(models.Model):

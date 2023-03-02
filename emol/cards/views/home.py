@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from cards.mail import send_card_url, send_privacy_policy, send_info_update
-from cards.models.combatant import Combatant
-from current_user import get_current_user
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
+
+from cards.mail import send_card_url, send_info_update, send_privacy_policy
+from cards.models.combatant import Combatant
+from current_user import get_current_user
 
 logger = logging.getLogger("django")
 

@@ -1,5 +1,6 @@
-from cards.models.permission import PermissionDenied
 from models.combatant_update import CombatantUpdate, InvalidCode
+
+from cards.models.permission import PermissionDenied
 
 
 def update_info(combatant, data, code=None):

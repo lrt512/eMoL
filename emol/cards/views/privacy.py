@@ -1,9 +1,10 @@
 import logging
 
-from cards.models.combatant import Combatant
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
+
+from cards.models.combatant import Combatant
 
 logger = logging.getLogger("django")
 

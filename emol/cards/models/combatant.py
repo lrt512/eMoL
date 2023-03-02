@@ -11,13 +11,15 @@ from datetime import date
 from urllib.parse import urljoin
 from uuid import uuid4
 
-from cards.mail import send_card_url, send_privacy_policy
-from cards.utility.crypto import get_random_32
-from cards.utility.names import generate_name
 from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
 from django.urls import reverse
+
+from cards.mail import send_card_url, send_privacy_policy
+from cards.utility.crypto import get_random_32
+from cards.utility.names import generate_name
+
 from .card import Card
 from .discipline import Discipline
 from .permissioned_db_fields import (

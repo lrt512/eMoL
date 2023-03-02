@@ -1,17 +1,17 @@
 import logging
 
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
+
 from cards.models.authorization import Authorization
 from cards.models.card import Card
 from cards.models.combatant import Combatant
 from cards.models.combatant_authorization import CombatantAuthorization
 from cards.models.discipline import Discipline
 from cards.utility.date import today
-from django.core.exceptions import ValidationError
-from django.shortcuts import get_object_or_404
-from rest_framework import serializers, status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 
 logger = logging.getLogger("django")
 

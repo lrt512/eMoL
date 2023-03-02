@@ -273,8 +273,6 @@ def generate_name():
 
     Choose either a (beast + attitude + tincture) or (division + charge + tincture) set
     """
-    name = ""
-
     source = CHARGES if randint(1, 100) > 50 else BEASTS
     first = source[1][randint(0, len(source[1]) - 1)]
     second = source[2][randint(0, len(source[2]) - 1)]

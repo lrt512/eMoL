@@ -2,12 +2,13 @@
 """Handlers for combatant administration views."""
 import logging
 
+from django.shortcuts import redirect, render
+
 from cards.models.authorization import Authorization
 from cards.models.combatant import Combatant
 from cards.models.discipline import Discipline
 from cards.utility.decorators import permission_required
 from current_user import get_current_user
-from django.shortcuts import redirect, render
 
 logger = logging.getLogger("django")
 

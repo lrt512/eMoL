@@ -20,15 +20,15 @@
 import logging
 from uuid import uuid4
 
-from cards.utility.date import DATE_FORMAT, add_years, today
 from django.db import models
+
+from cards.utility.date import DATE_FORMAT, add_years, today
+from cards.utility.named_tuples import NameSlugTuple
 
 from .authorization import Authorization
 from .discipline import Discipline
 from .marshal import Marshal
 from .reminder_email import ReminderEmail
-
-from cards.utility.named_tuples import NameSlugTuple
 
 __all__ = ["Card"]
 

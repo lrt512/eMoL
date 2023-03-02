@@ -1,10 +1,11 @@
 import logging
 
-from cards.models.combatant import Combatant
 from rest_framework import serializers
 from rest_framework.renderers import JSONRenderer
 from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+
+from cards.models.combatant import Combatant
 
 from .permissions import CombatantInfoPermission
 

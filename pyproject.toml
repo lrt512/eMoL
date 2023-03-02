@@ -31,6 +31,7 @@ pylint = "^2.16.2"
 
 [tool.isort]
 profile = "black"
+src_paths = ["cards","sso_user","emol","emailer","current_user"]
 
 [tool.pylint.format]
 max-line-length = "88"
