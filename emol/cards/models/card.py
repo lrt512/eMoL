@@ -32,7 +32,7 @@ from cards.utility.named_tuples import NameSlugTuple
 
 __all__ = ["Card"]
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 
 class Card(models.Model):
@@ -133,7 +133,7 @@ class Card(models.Model):
     def has_authorization(self, authorization):
         """Does this card have a given authorization?"""
         try:
-            a = Authorization.find(self.discipline, authorization)
+            a = Authorization.get_authorization(self.discipline, authorization)
             return a in self.authorizations.all()
         except Authorization.DoesNotExist:
             return False
@@ -178,3 +178,60 @@ class Card(models.Model):
         marshals = self.discipline.marshals.all()
         tuples = [NameSlugTuple(name=m.name, slug=m.slug) for m in marshals]
         return tuples
+
+    @property
+    def authorizations_list(self):
+        """
+        Return a list of tuples of authorization names and whether
+        or not the authorization is primary.
+        """
+        return [
+            (a.name, a.is_primary) for a in self.authorizations.order_by("name").all()
+        ]
+
+    @property
+    def warrants_list(self):
+        """
+        Return a list of tuples of warrant names and whether
+        or not the warrant is expired.
+        """
+        return [
+            (w.marshal.name, w.expiry_date < today())
+            for w in self.warrants.order_by("marshal__name").all()
+        ]
+
+    @classmethod
+    def create(
+        cls,
+        combatant,
+        discipline,
+        authorizations,
+        warrants,
+        card_issued=None,
+        create_date=None,
+    ):
+        """Create a new card object"""
+
+        card_issued = card_issued or today()
+        create_date = create_date or today()
+
+        card = cls(
+            combatant=combatant,
+            discipline=discipline,
+            card_issued=card_issued,
+            uuid=uuid4(),
+        )
+
+        card.save()
+
+        for a in authorizations:
+            auth = Authorization.get_authorization(discipline, a)
+            card.authorizations.add(auth)
+
+        for w in warrants:
+            marshal = Marshal.find(discipline, w)
+            card.warrants.add(marshal)
+
+        card.renew(create_date)
+
+        return card

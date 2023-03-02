@@ -66,7 +66,9 @@ class SSOUser(AbstractBaseUser):
         ).hexdigest()
 
     def has_module_perms(self, package_name):
+        """Unused in this context, we use our own permissions systems"""
         return True
 
-    def has_perm(perm, obj=None):
+    def has_perm(self, perm, obj=None):
+        """Unused in this context, we use our own permissions systems"""
         return True

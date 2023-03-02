@@ -9,7 +9,7 @@ from cards.utility.decorators import permission_required
 from current_user import get_current_user
 from django.shortcuts import redirect, render
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 
 @permission_required("read_combatant_info")

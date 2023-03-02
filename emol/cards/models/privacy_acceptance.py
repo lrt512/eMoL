@@ -14,7 +14,7 @@ from pytz import timezone
 
 __all__ = ["PrivacyAcceptance"]
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 
 class PrivacyPolicyNotAccepted(Exception):

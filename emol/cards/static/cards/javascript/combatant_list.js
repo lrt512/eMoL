@@ -113,13 +113,14 @@
             method: "GET",
             success: function (data, status, jqXHR) {
                 $(".combatant-authorization").attr("selected", null);
+
                 data.forEach((card) => {
-                    var discipline_selector = "[data-discipline=" + card.discipline + "]";
-                    $('[name=card_issued_' + card.discipline + ']').val(card.card_issued);
-                    $('[name=card_uuid_' + card.discipline + ']').val(card.uuid);
+                    var discipline_selector = "[data-discipline=" + card.discipline.slug + "]";
+                    $('[name=card_issued_' + card.discipline.slug + ']').val(card.card_issued);
+                    $('[name=card_uuid_' + card.discipline.slug + ']').val(card.uuid);
 
                     card.authorizations.forEach((auth) => {
-                        var authorization_selector = "[data-authorization=" + auth.authorization + "]",
+                        var authorization_selector = "[data-authorization=" + auth.slug + "]",
                             $checkbox = $(
                                 ".combatant-authorization" +
                                 discipline_selector +
@@ -129,7 +130,7 @@
                         $checkbox.attr("checked", "");
                     });
                     card.warrants.forEach((warrant) => {
-                        var marshal_selector = "[data-marshal=" + warrant.marshal + "]",
+                        var marshal_selector = "[data-marshal=" + warrant.slug + "]",
                             $checkbox = $(
                                 ".combatant-marshal" +
                                 discipline_selector +

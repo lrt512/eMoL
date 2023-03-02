@@ -7,7 +7,7 @@ from current_user import get_current_user
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 
 def index(request):

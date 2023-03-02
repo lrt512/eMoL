@@ -17,6 +17,8 @@ _thread_locals = local()
 
 
 def _set_current_user(user_func):
+    # setattr(_thread_locals, USER_ATTR_NAME, user_func)
+    # Maybe we don't need to make a bound method here
     setattr(_thread_locals, USER_ATTR_NAME, user_func.__get__(user_func, local))
 
 

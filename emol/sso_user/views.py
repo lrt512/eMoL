@@ -10,7 +10,8 @@ from sso_user.models import SSOUser
 
 ADMIN_OAUTH_LOGIN_HINT = "admin-oauth-login-hint"
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
+
 
 @never_cache
 def oauth_login(request):

@@ -19,7 +19,7 @@ TINCTURES = [
 ]
 
 BEASTS = {
-    1 : [
+    1: [
         "antelope",
         "arrow",
         "attire",
@@ -97,7 +97,7 @@ BEASTS = {
         "wolf",
         "wyvern",
         "yale",
-    ], 
+    ],
     2: [
         "passant",
         "rampant",
@@ -110,7 +110,7 @@ BEASTS = {
         "volant",
         "combatant",
         "regardant",
-    ]
+    ],
 }
 
 CHARGES = {
@@ -267,8 +267,6 @@ CHARGES = {
 }
 
 
-
-
 def generate_name():
     """
     Generate a random name
@@ -283,6 +281,7 @@ def generate_name():
     tincture = TINCTURES[randint(0, len(TINCTURES) - 1)]
 
     return f"{first}-{second}-{tincture}"
+
 
 if __name__ == "__main__":
     for i in range(50):

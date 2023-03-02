@@ -2,9 +2,6 @@ from uuid import uuid4
 
 from django.db import models
 
-from .authorization import Authorization
-from .card import Card
-
 
 class CombatantAuthorization(models.Model):
     """
@@ -16,8 +13,8 @@ class CombatantAuthorization(models.Model):
         db_table = "cards_combatant_authorization"
         indexes = [models.Index(fields=["uuid"])]
 
-    card = models.ForeignKey(Card, on_delete=models.CASCADE)
-    authorization = models.ForeignKey(Authorization, on_delete=models.DO_NOTHING)
+    card = models.ForeignKey("Card", on_delete=models.CASCADE)
+    authorization = models.ForeignKey("Authorization", on_delete=models.DO_NOTHING)
     uuid = models.UUIDField(default=uuid4, editable=False)
 
     def __str__(self):

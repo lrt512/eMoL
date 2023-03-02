@@ -7,39 +7,45 @@ class CombatantInfoPermission(permissions.BasePermission):
     """Check if user can read or write combatant info"""
 
     def has_object_permission(self, request, view, obj):
-        if request.method == "GET":
+        if request.method in permissions.SAFE_METHODS:
             return UserPermission.user_has_permission(
-                request.user, "read_combatant_info"
+                request.user, CombatantInfoPermission.READ_PERMISSION
             )
 
-        if request.method in ("POST", "PATCH", "DELETE"):
-            return UserPermission.user_has_permission(
-                request.user, "read_combatant_info"
-            )
+        return UserPermission.user_has_permission(
+            request.user, CombatantInfoPermission.WRITE_PERMISSION
+        )
 
-        return False
+    READ_PERMISSION = "read_combatant_info"
+    WRITE_PERMISSION = "write_combatant_info"
 
 
 class WaiverDatePermission(permissions.BasePermission):
     """Check if user can read or write waiver date"""
 
     def has_object_permission(self, request, view, obj):
-        if request.method == "GET":
-            return UserPermission.user_has_permission(request.user, "read_waiver_date")
+        if request.method in permissions.SAFE_METHODS:
+            return UserPermission.user_has_permission(
+                request.user, WaiverDatePermission.READ_PERMISSION
+            )
 
-        if request.method in ("POST", "PATCH"):
-            return UserPermission.user_has_permission(request.user, "write_waiver_date")
+        return UserPermission.user_has_permission(
+            request.user, WaiverDatePermission.WRITE_PERMISSION
+        )
 
-        return False
+    READ_PERMISSION = "read_waiver_date"
+    WRITE_PERMISSION = "write_waiver_date"
 
 
 class CardDatePermission(permissions.BasePermission):
     """Check if user can write card date"""
 
     def has_object_permission(self, request, view, obj):
-        if request.method in ("PUT"):
+        if request.method == "PUT":
             return UserPermission.user_has_permission(
-                request.user, "write_card_date"
+                request.user, CardDatePermission.WRITE_PERMISSION
             )
 
         return False
+
+    WRITE_PERMISSION = "write_card_date"

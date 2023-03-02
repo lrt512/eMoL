@@ -8,7 +8,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from .permissions import CombatantInfoPermission
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 
 class CombatantListSerializer(ModelSerializer):
@@ -53,33 +53,34 @@ class CombatantSerializer(ModelSerializer):
             "member_number",
         ]
 
-        optional_fields = [
-            "uuid",
-            "member_expiry",
-            "member_number",
-        ]
+        extra_kwargs = {
+            "dob": {"format": "%Y-%m-%d", "allow_null": True},
+            "member_expiry": {"format": "%Y-%m-%d", "allow_null": True},
+        }
 
-        clean_blank_strings = [
+    def validate(self, data):
+        """
+        Ensure that if member_expiry is specified, then member_number is also specified.
+        """
+        if data.get("member_expiry") and not data.get("member_number"):
+            raise serializers.ValidationError(
+                "If member_expiry is specified, member_number must also be specified."
+            )
+        return data
+
+    def to_internal_value(self, data):
+        """
+        Clean up blank strings for specified fields before validation
+        """
+        for attr in [
             "sca_name",
             "member_expiry",
             "member_number",
             "address2",
             "dob",
-            "uuid",
-        ]
-
-    member_expiry = serializers.DateField(format="%Y-%m-%d", allow_null=True)
-
-    def to_internal_value(self, data):
-        """
-        Hacky way to get at the data to clean it before DRF's validators
-        go insane.
-        """
-        # Clean up blank strings on specified fields
-        for attr in __class__.Meta.clean_blank_strings:
-            if attr in data and len(data[attr]) == 0:
+        ]:
+            if attr in data and not data[attr]:
                 data[attr] = None
-
         return super().to_internal_value(data)
 
 

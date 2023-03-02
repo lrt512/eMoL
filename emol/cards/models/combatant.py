@@ -28,7 +28,7 @@ from .permissioned_db_fields import (
 
 __all__ = ["Combatant"]
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 
 class Combatant(models.Model):
@@ -212,30 +212,26 @@ class Combatant(models.Model):
         self.save()
         send_card_url(self)
 
-    def membership_valid(self, on_date=None):
-        """Check if the combatant's membership is valid.
 
-        Check the combatant's membership info in the encrypted blob.
-        If the membership info is empty, then no. Otherwise, based on the
-        membership expiry date
+def membership_valid(self, on_date=None):
+    """Check if the combatant's membership is valid.
 
-        Args:
-            on_date: Optional date to check against, otherwise use today
+    Check the combatant's membership info in the encrypted blob.
+    If the membership info is empty, then no. Otherwise, based on the
+    membership expiry date
 
-        Returns:
-            Boolean
+    Args:
+        on_date: Optional date to check against, otherwise use today
 
-        """
-        if self.member_number is None:
-            return False
+    Returns:
+        Boolean
 
-        if self.member_expiry is None:
-            return False
-
-        if on_date is None:
-            return self.member_expiry >= date.today()
-        else:
-            return self.member_expiry >= on_date
+    """
+    return (
+        self.member_number is not None
+        and self.member_expiry is not None
+        and (on_date or date.today()) <= self.member_expiry
+    )
 
 
 @receiver(models.signals.post_save, sender=Combatant)

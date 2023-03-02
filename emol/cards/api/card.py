@@ -1,7 +1,9 @@
 import logging
 
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+
 from cards.models.card import Card
-from cards.models.combatant import Combatant
 from cards.models.discipline import Discipline
 from cards.models.combatant_authorization import CombatantAuthorization
 from cards.models.combatant_warrant import CombatantWarrant
@@ -9,20 +11,54 @@ from rest_framework import status, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import GenericViewSet
 
 from .permissions import CardDatePermission
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 
-class CardSerializer(ModelSerializer):
+from rest_framework import serializers
+
+
+class CombatantAuthorizationSerializer(serializers.ModelSerializer):
+    slug = serializers.SlugField(source="authorization.slug")
+    name = serializers.CharField(source="authorization.name")
+
+    class Meta:
+        model = CombatantAuthorization
+        fields = ["uuid", "slug", "name"]
+
+
+class CombatantWarrantSerializer(serializers.ModelSerializer):
+    slug = serializers.SlugField(source="marshal.slug")
+    name = serializers.CharField(source="marshal.name")
+
+    class Meta:
+        model = CombatantWarrant
+        fields = ["uuid", "slug", "name"]
+
+
+class DisciplineSerializer(serializers.ModelSerializer):
+    """Serializer for CombatantAuthorization model"""
+
+    class Meta:
+        model = Discipline
+        fields = ["name", "slug"]
+
+
+class CardSerializer(serializers.ModelSerializer):
     """Serializer for Card model"""
+
+    authorizations = CombatantAuthorizationSerializer(
+        source="combatantauthorization_set", many=True
+    )
+    warrants = CombatantWarrantSerializer(source="combatantwarrant_set", many=True)
+    discipline = DisciplineSerializer(read_only=True)
 
     class Meta:
         model = Card
-        fields = ["discipline", "authorizations", "warrants"]
+        fields = ["uuid", "discipline", "card_issued", "authorizations", "warrants"]
 
 
 class CardViewSet(GenericViewSet):
@@ -31,7 +67,7 @@ class CardViewSet(GenericViewSet):
     """
 
     queryset = Card.objects.all()
-    serializer_class = Card
+    serializer_class = CardSerializer
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
     lookup_field = "uuid"
@@ -44,37 +80,8 @@ class CardViewSet(GenericViewSet):
             uuid - A combatant's UUID
         """
         cards = Card.objects.filter(combatant__uuid=uuid)
-        data = []
-        for card in cards.all():
-            card_data = {
-                "discipline": card.discipline.slug,
-                "card_issued": card.card_issued,
-                "uuid": card.uuid,
-            }
-
-            auth_data = []
-            for auth in CombatantAuthorization.objects.filter(card=card).all():
-                auth_data.append(
-                    {
-                        "authorization": auth.authorization.slug,
-                        "uuid": auth.uuid,
-                    }
-                )
-            card_data["authorizations"] = auth_data
-
-            warrant_data = []
-            for warrant in CombatantWarrant.objects.filter(card=card).all():
-                warrant_data.append(
-                    {
-                        "marshal": warrant.marshal.slug,
-                        "uuid": warrant.uuid,
-                    }
-                )
-            card_data["warrants"] = warrant_data
-
-            data.append(card_data)
-
-        return Response(status=status.HTTP_200_OK, data=data)
+        serializer = self.get_serializer(cards, many=True)
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
 
 
 class CardDateSerializer(serializers.Serializer):
@@ -86,7 +93,7 @@ class CardDateSerializer(serializers.Serializer):
 
 class CardDateViewSet(GenericViewSet):
     """
-    API viewset to add and remove auths from a combatant card
+    API viewset to update card issue date
     """
 
     queryset = Card.objects.all()
@@ -94,62 +101,18 @@ class CardDateViewSet(GenericViewSet):
     serializer_class = CardDateSerializer
     renderer_classes = [JSONRenderer]
 
-    def _update_card_issued_date(self, request_data):
-        """
-        Add card date to a combatant's card
-        If the card doesn't exist for the specified discipline, create one.
-
-        POST data:
-            uuid - Combatant UUID
-            discipline - A discipline slug
-            card_issued - Card's new issue date
-        """
-        serializer = self.get_serializer(data=request_data)
-        serializer.is_valid(raise_exception=True)
-        
-        uuid = serializer.data.get("uuid")
-        discipline_slug = serializer.data.get("discipline_slug")
-        card_issued = serializer.data.get("card_issued")
-
-        logger.debug(
-            "Update card issue date on %s card for combatant %s",
-            discipline_slug,
-            uuid,
-        )
-
-        try:
-            combatant = Combatant.objects.get(uuid=uuid)
-        except Combatant.DoesNotExist:
-            return Response("Combatant not found", status=status.HTTP_404_NOT_FOUND)
-
-        try:
-            discipline = Discipline.objects.get(slug=discipline_slug)
-        except Discipline.DoesNotExist:
-            return Response(
-                f"No such discipline '{discipline_slug}'",
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        try:
-            card = (
-                self.queryset.filter(discipline=discipline)
-                .filter(combatant=combatant)
-                .get()
-            )
-        except Card.DoesNotExist:
-            logger.debug("Create %s card for combatant %s", discipline_slug, uuid)
-            card = Card(
-                combatant=combatant, discipline=discipline, card_issued=card_issued
-            )
-        finally:
-            card.card_issued = card_issued
-            card.save()
-
     def update(self, request, **kwargs):
-        """PUT endpoint for _update_card_issued_date
-        
-        A bit janky on HTTP verbs since we will create a card if it 
-        doesn't exist. But... meh. It's all an "update"
-        """
-        self._update_card_issued_date(request.data)
+        """PUT endpoint to update card issue date"""
+        serializer = self.get_serializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        # Retrieve card based on uuid and discipline_slug
+        uuid = serializer.validated_data["uuid"]
+        discipline_slug = serializer.validated_data["discipline_slug"]
+        card = get_object_or_404(Card, combatant__uuid=uuid, discipline__slug=discipline_slug)
+
+        # Update card_issued field
+        card.card_issued = serializer.validated_data["card_issued"]
+        card.save()
+
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -5,7 +5,7 @@ from emailer import Emailer
 
 from .email_templates import EMAIL_TEMPLATES
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 
 def send_waiver_expiry(reminder):

@@ -68,3 +68,11 @@ class ReminderEmail(models.Model):
 
         if self.sent:
             self.save()
+
+    def should_send_email(self) -> bool:
+        combatant = self.content_object.combatant
+        if not combatant.accepted_privacy_policy:
+            return False
+        if combatant.opt_out_reminder_emails:
+            return False
+        return True
