@@ -133,7 +133,7 @@ class Card(models.Model):
     def has_authorization(self, authorization):
         """Does this card have a given authorization?"""
         try:
-            a = Authorization.get_authorization(self.discipline, authorization)
+            a = Authorization.find(self.discipline, authorization)
             return a in self.authorizations.all()
         except Authorization.DoesNotExist:
             return False
@@ -225,7 +225,7 @@ class Card(models.Model):
         card.save()
 
         for a in authorizations:
-            auth = Authorization.get_authorization(discipline, a)
+            auth = Authorization.find(discipline, a)
             card.authorizations.add(auth)
 
         for w in warrants:
