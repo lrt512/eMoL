@@ -4,8 +4,6 @@
 from django.db import models
 from django.utils.text import slugify
 
-__all__ = ["Discipline"]
-
 
 class Discipline(models.Model):
     """Model a discipline.
@@ -36,7 +34,8 @@ class Discipline(models.Model):
         return f"<Discipline: {self.slug}>"
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
+        if not self.pk:
+            self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
     @classmethod
@@ -51,24 +50,16 @@ class Discipline(models.Model):
             Discipline object
 
         Raises:
-            Discipline.DoesNotExist
+            ValueError: If discipline is None
+            Discipline.DoesNotExist: If discipline is not found
 
         """
-        if discipline is None:
-            return None
-
         if isinstance(discipline, Discipline):
             return discipline
 
-        if isinstance(discipline, str):
-            try:
-                return Discipline.objects.get(slug=discipline)
-            except Discipline.DoesNotExist:
-                pass
+        query = models.Q(slug=discipline) | models.Q(name=discipline)
+        discipline = cls.objects.filter(discipline=discipline).filter(query).first()
+        if discipline is None:
+            raise cls.DoesNotExist(f"No discipline found for {discipline}")
 
-            return Discipline.objects.get(name=discipline)
-
-        if isinstance(discipline, int):
-            return Discipline.objects.get(id=discipline)
-
-        raise ValueError("Invalid discipline type")
+        return discipline

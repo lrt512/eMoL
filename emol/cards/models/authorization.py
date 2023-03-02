@@ -1,12 +1,7 @@
-# -*- coding: utf-8 -*-
-"""Model for an authorization."""
-
 from django.db import models
 from django.utils.text import slugify
 
 from .discipline import Discipline
-
-__all__ = ["Authorization"]
 
 
 class Authorization(models.Model):
@@ -24,18 +19,19 @@ class Authorization(models.Model):
 
     """
 
-    slug = models.CharField(null=False, max_length=255)
-    name = models.CharField(null=False, max_length=255)
-    is_primary = models.BooleanField(null=False, default=False)
+    slug = models.SlugField(max_length=255, unique=True, editable=False)
+    name = models.CharField(max_length=255, null=False)
+    is_primary = models.BooleanField(default=False, null=False)
     discipline = models.ForeignKey(
-        Discipline, on_delete=models.CASCADE, related_name="authorizations"
+        Discipline, related_name="authorizations", on_delete=models.CASCADE
     )
 
     def __str__(self):
         return f"<Authorization: {self.discipline.slug}.{self.slug}>"
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
+        if not self.pk:
+            self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
     @classmethod
@@ -43,38 +39,25 @@ class Authorization(models.Model):
         """Look up an authorization.
 
         Args:
-            discipline: A discipline slug (string) or id (int) or
-                Discipline object
-            authorization: An authorization slug (string) or id (int)
-                or Authorization object
+            discipline: A discipline slug (string) or id (int) or Discipline object
+            authorization: An authorization slug (string) or id (int) or Authorization object
 
         Returns:
             Authorization object
 
         Raises:
-            Authorization.DoesNotExist
-             Discipline.DoesNotExist
-
+            Authorization.DoesNotExist, Discipline.DoesNotExist
         """
-        #  Null case
         if isinstance(authorization, Authorization):
             return authorization
 
         discipline = Discipline.find(discipline)
 
-        if isinstance(authorization, str):
-            try:
-                return (
-                    Authorization.objects.filter(discipline=discipline)
-                    .filter(slug=authorization)
-                    .get()
-                )
-            except Authorization.DoesNotExist:
-                pass
-
-            # Let the DoesNotExist fly if not found here
-            return (
-                Authorization.objects.filter(discipline=discipline)
-                .filter(name=authorization)
-                .get()
+        query = models.Q(slug=authorization) | models.Q(name=authorization)
+        authorization = cls.objects.filter(discipline=discipline).filter(query).first()
+        if authorization is None:
+            raise cls.DoesNotExist(
+                f"No authorization found for discipline {discipline.slug} and authorization {authorization}"
             )
+
+        return authorization

@@ -91,6 +91,7 @@ class CardDateSerializer(serializers.Serializer):
     discipline_slug = serializers.CharField()
     card_issued = serializers.DateField()
 
+
 class CardDateViewSet(GenericViewSet):
     """
     API viewset to update card issue date
@@ -109,7 +110,9 @@ class CardDateViewSet(GenericViewSet):
         # Retrieve card based on uuid and discipline_slug
         uuid = serializer.validated_data["uuid"]
         discipline_slug = serializer.validated_data["discipline_slug"]
-        card = get_object_or_404(Card, combatant__uuid=uuid, discipline__slug=discipline_slug)
+        card = get_object_or_404(
+            Card, combatant__uuid=uuid, discipline__slug=discipline_slug
+        )
 
         # Update card_issued field
         card.card_issued = serializer.validated_data["card_issued"]
