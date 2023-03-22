@@ -10,7 +10,7 @@ from cards.models.discipline import Discipline
 from cards.utility.decorators import permission_required
 from current_user import get_current_user
 
-logger = logging.getLogger("django")
+logger = logging.getLogger("cards")
 
 
 @permission_required("read_combatant_info")

@@ -32,7 +32,7 @@ from .reminder_email import ReminderEmail
 
 __all__ = ["Card"]
 
-logger = logging.getLogger("django")
+logger = logging.getLogger("cards")
 
 
 class Card(models.Model):

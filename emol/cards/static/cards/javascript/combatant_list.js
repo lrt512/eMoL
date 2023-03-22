@@ -115,9 +115,10 @@
                 $(".combatant-authorization").attr("selected", null);
 
                 data.forEach((card) => {
-                    var discipline_selector = "[data-discipline=" + card.discipline.slug + "]";
-                    $('[name=card_issued_' + card.discipline.slug + ']').val(card.card_issued);
-                    $('[name=card_uuid_' + card.discipline.slug + ']').val(card.uuid);
+                    var discipline = card.discipline.slug;
+                    var discipline_selector = "[data-discipline=" + discipline + "]";
+                    $('[name=card_issued_' + discipline + ']').val(card.card_issued);
+                    $('[name=card_uuid_' + discipline + ']').val(card.uuid);
 
                     card.authorizations.forEach((auth) => {
                         var authorization_selector = "[data-authorization=" + auth.slug + "]",
@@ -255,7 +256,7 @@
                 data: JSON.stringify(data),
                 headers: { "X-CSRFToken": csrf_token() },
                 success: function (response) {
-                    fetch_combatant_cards();
+                    $checkbox.data("uuid", response.uuid);
                 },
             });
         } else {
@@ -265,7 +266,7 @@
                 url: url,
                 headers: { "X-CSRFToken": csrf_token() },
                 success: function (response) {
-                    fetch_combatant_cards();
+                    $checkbox.removeData("uuid");
                 },
             });
         }

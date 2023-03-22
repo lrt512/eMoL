@@ -40,9 +40,13 @@ class WaiverViewSet(viewsets.ModelViewSet):
 
         combatant = get_object_or_404(Combatant, uuid=uuid)
 
-        waiver, _ = Waiver.objects.get_or_create(combatant=combatant)
-        waiver.date_signed = serializer.validated_data.get("date_signed")
-        waiver.save()
+        try:
+            waiver = Waiver.objects.get(combatant=combatant)
+            waiver.date_signed = serializer.validated_data.get("date_signed")
+        except Waiver.DoesNotExist:
+            waiver = Waiver(combatant=combatant, date_signed=serializer.validated_data.get("date_signed"))
+        finally:
+            waiver.save()
 
         response_data = {
             "date_signed": waiver.date_signed,

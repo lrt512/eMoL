@@ -13,7 +13,7 @@ from cards.models.combatant_authorization import CombatantAuthorization
 from cards.models.discipline import Discipline
 from cards.utility.date import today
 
-logger = logging.getLogger("django")
+logger = logging.getLogger("cards")
 
 
 class CombatantAuthorizationSerializer(serializers.ModelSerializer):
@@ -75,7 +75,7 @@ class CombatantAuthorizationViewSet(GenericViewSet):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         """

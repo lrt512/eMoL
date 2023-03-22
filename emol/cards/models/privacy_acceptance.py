@@ -15,7 +15,7 @@ from cards.utility.names import generate_name
 
 __all__ = ["PrivacyAcceptance"]
 
-logger = logging.getLogger("django")
+logger = logging.getLogger("cards")
 
 
 class PrivacyPolicyNotAccepted(Exception):

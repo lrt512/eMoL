@@ -20,7 +20,7 @@ class CombatantWarrantSerializer(serializers.ModelSerializer):
         fields = ["card", "marshal", "uuid"]
 
 
-logger = logging.getLogger("django")
+logger = logging.getLogger("cards")
 
 
 class CombatantWarrantViewSet(GenericViewSet):
@@ -74,7 +74,7 @@ class CombatantWarrantViewSet(GenericViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
 
     def destroy(self, request, uuid):
         """

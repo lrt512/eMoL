@@ -11,7 +11,7 @@ from sso_user.models import SSOUser
 
 ADMIN_OAUTH_LOGIN_HINT = "admin-oauth-login-hint"
 
-logger = logging.getLogger("django")
+logger = logging.getLogger("cards")
 
 
 @never_cache

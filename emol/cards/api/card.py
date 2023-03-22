@@ -14,7 +14,7 @@ from cards.models.discipline import Discipline
 
 from .permissions import CardDatePermission
 
-logger = logging.getLogger("django")
+logger = logging.getLogger("cards")
 
 
 class CombatantAuthorizationSerializer(serializers.ModelSerializer):

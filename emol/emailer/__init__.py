@@ -6,7 +6,7 @@ import boto3
 from botocore.exceptions import ClientError
 from django.conf import settings
 
-logger = logging.getLogger("django")
+logger = logging.getLogger("cards")
 
 
 class Emailer:
@@ -34,9 +34,9 @@ class Emailer:
 
         """
         if settings.SEND_EMAIL is False:
-            logger.debug(f"Not sending email to {recipient}")
-            logger.debug(subject)
-            logger.debug(body)
+            logger.info(f"Not sending email to {recipient}")
+            logger.info(subject)
+            logger.info(body)
             return True
 
         sender = settings.MAIL_DEFAULT_SENDER

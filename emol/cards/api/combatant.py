@@ -9,7 +9,7 @@ from cards.models.combatant import Combatant
 
 from .permissions import CombatantInfoPermission
 
-logger = logging.getLogger("django")
+logger = logging.getLogger("cards")
 
 
 class CombatantListSerializer(ModelSerializer):

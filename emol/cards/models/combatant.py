@@ -17,7 +17,6 @@ from django.dispatch import receiver
 from django.urls import reverse
 
 from cards.mail import send_card_url, send_privacy_policy
-from cards.utility.crypto import get_random_32
 from cards.utility.names import generate_name
 
 from .card import Card
@@ -30,7 +29,7 @@ from .permissioned_db_fields import (
 
 __all__ = ["Combatant"]
 
-logger = logging.getLogger("django")
+logger = logging.getLogger("cards")
 
 
 class Combatant(models.Model):
@@ -63,7 +62,7 @@ class Combatant(models.Model):
 
     accepted_privacy_policy = models.BooleanField(default=False)
     privacy_acceptance_code = models.CharField(
-        max_length=32, unique=True, default=get_random_32, null=True
+        max_length=32, unique=True, null=True
     )
 
     # Data columns that are not encrypted
@@ -239,4 +238,7 @@ def membership_valid(self, on_date=None):
 @receiver(models.signals.post_save, sender=Combatant)
 def send_privacy_policy_email(sender, instance, created, **kwargs):
     if created and not instance.accepted_privacy_policy:
+        logger.debug(
+            f"Sending privacy policy email to {instance} ({instance.email})"
+        )
         send_privacy_policy(instance)

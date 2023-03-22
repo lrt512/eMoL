@@ -6,7 +6,7 @@ from django.views.decorators.http import require_http_methods
 
 from cards.models.combatant import Combatant
 
-logger = logging.getLogger("django")
+logger = logging.getLogger("cards")
 
 
 @require_http_methods(["GET", "POST"])

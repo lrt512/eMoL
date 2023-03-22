@@ -8,7 +8,7 @@ from cards.mail import send_card_url, send_info_update, send_privacy_policy
 from cards.models.combatant import Combatant
 from current_user import get_current_user
 
-logger = logging.getLogger("django")
+logger = logging.getLogger("cards")
 
 
 def index(request):

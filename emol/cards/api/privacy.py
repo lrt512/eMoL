@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from cards.mail import send_privacy_policy
 from cards.models.combatant import Combatant
 
-logger = logging.getLogger("django")
+logger = logging.getLogger("cards")
 
 
 class ResendPrivacySerializer(serializers.Serializer):
@@ -34,7 +34,7 @@ class ResendPrivacyView(APIView):
             Combatant, uuid=serializer.validated_data["combatant_uuid"]
         )
 
-        if combatant.has_accepted_privacy_policy():
+        if combatant.accepted_privacy_policy:
             logger.warning(
                 "Combatant %s has already accepted the privacy policy", combatant
             )
@@ -46,7 +46,7 @@ class ResendPrivacyView(APIView):
             )
 
         send_privacy_policy(combatant)
-        logger.info("Sent privacy policy reminder to %s", combatant.name)
+        # logger.info("Sent privacy policy reminder to %s", combatant.name)
         return Response(
             {"message": f"Sent privacy policy reminder to {combatant.name}"},
             status=status.HTTP_200_OK,
