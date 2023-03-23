@@ -637,6 +637,40 @@ files = [
 Django = ">=3.2"
 
 [[package]]
+name = "django-csp"
+version = "3.7"
+description = "Django Content Security Policy support."
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "django_csp-3.7-py2.py3-none-any.whl", hash = "sha256:01443a07723f9a479d498bd7bb63571aaa771e690f64bde515db6cdb76e8041a"},
+    {file = "django_csp-3.7.tar.gz", hash = "sha256:01eda02ad3f10261c74131cdc0b5a6a62b7c7ad4fd017fbefb7a14776e0a9727"},
+]
+
+[package.dependencies]
+Django = ">=1.8"
+
+[package.extras]
+jinja2 = ["jinja2 (>=2.9.6)"]
+tests = ["jinja2 (>=2.9.6)", "mock (==1.0.1)", "pep8 (==1.4.6)", "pytest (<4.0)", "pytest-django", "pytest-flakes (==1.0.1)", "pytest-pep8 (==1.0.6)", "six (==1.12.0)"]
+
+[[package]]
+name = "django-permissions-policy"
+version = "4.15.0"
+description = "Set the draft security HTTP header Permissions-Policy (previously Feature-Policy) on your Django app."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "django_permissions_policy-4.15.0-py3-none-any.whl", hash = "sha256:e80b535b771ebf166fc1452254ce07772affac9b7960975b3909510760d653ac"},
+    {file = "django_permissions_policy-4.15.0.tar.gz", hash = "sha256:43f72a66c40b68c8de47ac9390a8f31994551daeaef196c9d20761b38ab324ca"},
+]
+
+[package.dependencies]
+Django = ">=3.2"
+
+[[package]]
 name = "djangorestframework"
 version = "3.14.0"
 description = "Web APIs for Django, made easy."
@@ -1396,4 +1430,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.10"
-content-hash = "eb19b5f76a72e7d8dd4f94c78901cc72172b1a702e961c8a504647008a448695"
+content-hash = "3ca52df164b777ac831d2ef40495f1541d0c51b023bb30651b622edf75cc9395"
