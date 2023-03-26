@@ -28,10 +28,7 @@ class Discipline(models.Model):
     slug = models.SlugField(max_length=255, unique=True, editable=False)
 
     def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return f"<Discipline: {self.slug}>"
+        return f"<Discipline: {self.name}>"
 
     def save(self, *args, **kwargs):
         if not self.pk:

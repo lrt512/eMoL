@@ -1,28 +1,30 @@
+{% load permissions %}
+
+{% has_global_permission request.user "write_combatant_info" as write_combatant_info %}
 <div class="col-md-6">
     <div class="form-group row">
         <label for="edit-combatant-sca-name" class="col-md-4 col-form-label">SCA Name</label>
         <div class="col-md-8">
-                <!-- Disable if not write_combatant_info -->
                 <input type="text" id="edit-combatant-sca-name" name="sca_name" class="form-control"
-                   value="{% firstof combatant.sca_name '' %}"/>
+                   value="{% firstof combatant.sca_name '' %}" 
+                   {% if not write_combatant_info %}disabled{% endif %}/>
         </div>
     </div>
     <div class="form-group row">
         <label for="edit-combatant-legal-name"class="col-md-4 col-form-label">Legal Name</label>
         <div class="col-md-8">
-                <!-- Disable if not write_combatant_info -->
                 <input type="text" id="edit-combatant-legal-name" name="legal_name" class="form-control"
                    value="{% firstof combatant.legal_name '' %}"
-                   required/>
+                   required {% if not write_combatant_info %}disabled{% endif %}/>
         </div>
     </div>
     <div class="form-group row">
         <label for="edit-combatant-email" class="col-md-4 col-form-label">Email</label>
         <div class="col-md-8">
-                <!-- Disable if not write_combatant_info -->
                 <!-- Disable if self serve -->
                 <input type="text" id="edit-combatant-email" name="email" class="form-control"
-                   value="{% firstof combatant.email '' %}" required/>
+                   value="{% firstof combatant.email '' %}" required
+                   {% if not write_combatant_info %}disabled{% endif %} />
             <input type="hidden" id="edit-combatant-original_email"
                    name="original_email"
                    value="{{ firstof combatant.email '' %}"/>
@@ -31,75 +33,69 @@
     <div class="form-group row">
         <label for="edit-combatant-phone"class="col-md-4 col-form-label">Phone</label>
         <div class="col-md-8">
-                <!-- Disable if not write_combatant_info -->
                 <input type="text" id="edit-combatant-phone" name="phone" class="form-control"
                    value="{% firstof combatant.phone '' %}"
-                   required/>
+                   required {% if not write_combatant_info %}disabled{% endif %}/>
         </div>
     </div>
     <div class="form-group row">
         <label for="edit-combatant-address1" class="col-md-4 col-form-label">Address 1</label>
         <div class="col-md-8">
-                <!-- Disable if not write_combatant_info -->
                 <input type="text" id="edit-combatant-address1" name="address1" class="form-control"
                    value="{% firstof combatant.address1 '' %}"
-                   required/>
+                   required {% if not write_combatant_info %}disabled{% endif %} />
         </div>
     </div>
     <div class="form-group row">
         <label for="edit-combatant-address2" class="col-md-4 col-form-label">Address 2</label>
         <div class="col-md-8">
-                <!-- Disable if not write_combatant_info -->
                 <input type="text" id="edit-combatant-address2" name="address2" class="form-control"
-                   value="{% firstof combatant.address2 '' %}"/>
+                   value="{% firstof combatant.address2 '' %}" {% if not write_combatant_info %}disabled{% endif %}/>
         </div>
     </div>
     <div class="form-group row">
         <label for="edit-combatant-city" class="col-md-4 col-form-label">City</label>
         <div class="col-md-8">
-                <!-- Disable if not write_combatant_info -->
                 <input type="text" id="edit-combatant-city" name="city" class="form-control"
                    value="{% firstof combatant.city '' %}"
-                   required/>
+                   required {% if not write_combatant_info %}disabled{% endif %}/>
         </div>
     </div>
     <div class="form-group row">
         <label for="edit-combatant-province" class="col-md-4 col-form-label">Province</label>
         <div class="col-md-8">
-                <!-- Disable if not write_combatant_info -->
                 <input type="text" id="edit-combatant-province" name="province" class="form-control"
                    value="{% firstof combatant.province '' %}"
-                   required/>
+                   required {% if not write_combatant_info %}disabled{% endif %}/>
         </div>
     </div>
     <div class="form-group row">
         <label for="edit-combatant-postal-code" class="col-md-4 col-form-label">Postal Code</label>
         <div class="col-md-8">
-                <!-- Disable if not write_combatant_info -->
                 <input type="text" id="edit-combatant-postal-code" name="postal_code" class="form-control"
                    value="{% firstof combatant.postal_code '' %}"
-                   required/>
+                   required {% if not write_combatant_info %}disabled{% endif %}/>
         </div>
     </div>
     <div class="form-group row">
         <label for="edit-combatant-member-number" class="col-md-4 col-form-label">SCA Member</label>
         <div class="col-md-8">
-                <!-- Disable if not write_combatant_info -->
                 <input type="number" id="edit-combatant-member-number" name="member_number" class="form-control"
                    value="{% firstof combatant.member_number or '' '' %}"
-                />
+                   {% if not write_combatant_info %}disabled{% endif %} />
         </div>
     </div>
     <div class="form-group row">
         <label for="edit-combatant-member-expiry" class="col-md-4 col-form-label">Expiry</label>
         <div class="col-md-5">
-                <!-- Disable if not write_combatant_info -->
                 <input type="text" id="edit-combatant-member-expiry" name="member_expiry" class="form-control"
                    value="{% firstof combatant.member_expiry or '' '' %}"
-                   readonly/>
+                   readonly {% if not write_combatant_info %}disabled{% endif %}/>
         </div>
     </div>
 </div>
+
+{% if write_combatant_info %}
 <script type="text/javascript">
     (function($)
     {
@@ -111,3 +107,4 @@
         })
     })(jQuery);
 </script>
+{% endif %}

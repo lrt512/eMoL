@@ -7,6 +7,18 @@ register = template.Library()
 
 
 @register.simple_tag
-def has_global_permission(permission_slug, discipline_slug=None):
-    user = get_current_user()
-    return UserPermission.user_has_permission(user, permission_slug, discipline_slug)
+def has_global_permission(user, permission_slug):
+    if not user.is_authenticated:
+        return False
+
+    return UserPermission.user_has_permission(user, permission_slug)
+
+
+@register.simple_tag
+def has_permission(user, permission_slug, discipline):
+    if not user.is_authenticated:
+        return False
+
+    print(f"requested discipline: {discipline}")
+
+    return UserPermission.user_has_permission(user, permission_slug, discipline)

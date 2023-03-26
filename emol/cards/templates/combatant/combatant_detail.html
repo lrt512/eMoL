@@ -1,3 +1,5 @@
+{% load permissions %}
+
 <div class="modal fade" id="combatant-detail" role="dialog" data-backdrop="static">
   <div class="modal-dialog" style="width:800px;">
     <div class="modal-content">
@@ -43,9 +45,10 @@
                     {% endif %}
                   </label>
                   <div class="col-md-5">
-                    <!-- Disable if not edit_wavier_date -->
+                    {% has_global_permission request.user "write_waiver_date" as write_waiver_date %}
                     <input type="text" id="edit-waiver-date_signed" name="date_signed"
-                      value="{% firstof combatant.waiver.date_signed '' %}" class="form-control" readonly required />
+                      value="{% firstof combatant.waiver.date_signed '' %}" class="form-control" readonly required 
+                      {% if not write_waiver_date %}disabled{% endif %} />
                   </div>
                 </div>
                 <div class="form-group row">
@@ -63,7 +66,8 @@
                   </label>
                   <div class="col-md-5">
                     <input type="text" id="edit-waiver-expiration_date" name="expiration_date"
-                      value="{% firstof combatant.waiver.expiration_date '' %}" class="form-control" readonly />
+                      value="{% firstof combatant.waiver.expiration_date '' %}" class="form-control" readonly 
+                      disabled />
                   </div>
                 </div>
               </div>
@@ -83,27 +87,26 @@
                 </span>
               </label>
               <div class="col-md-2">
-                <!-- Disable if not edit_card_data -->
+                {% has_permission request.user "write_card_date" discipline as write_card_date %}
                 <input type="text" id="edit-combatant-card_issued_{{ discipline.slug }}"
                   name="card_issued_{{ discipline.slug }}" value="{% firstof card.card_issued '' %}"
-                  class="form-control card-date" data-discipline="{{ discipline.slug }}" readonly />
+                  class="form-control card-date" data-discipline="{{ discipline.slug }}" readonly 
+                  {% if not write_card_date %}disabled{% endif %} />
                 <input type="hidden" id="edit-combatant-card_uuid_{{ discipline.slug }}"
                   name="card_uuid_{{ discipline.slug }}" />
-
               </div>
             </div>
 
             <div class="row">
               <div class="col-md-2"></div>
               <div class="col-md-3">
+                {% has_permission request.user "write_authorizations" discipline as write_authorizations %}
                 {% for auth in discipline.authorizations.all %}
-                <!-- Disable if not edit_card_data -->
-                <!-- has_auth(card, auth.slug) -->
                 <div class="checkbox">
                   <label>
                     <input type="checkbox" class="combatant-authorization" id="{{ discipline.slug}}-{{ auth.slug }}"
                       data-endpoint="combatant-authorization" data-discipline="{{ discipline.slug }}"
-                      data-authorization="{{ auth.slug }}">
+                      data-authorization="{{ auth.slug }}" {% if not write_authorizations %}disabled{% endif %}>
                     {{ auth.name }}
                   </label>
                 </div>
@@ -114,14 +117,13 @@
             <div class="row">
               <div class="col-md-2"></div>
               <div class="col-md-3">
+                {% has_permission request.user "write_authorizations" discipline as write_authorizations %}
                 {% for marshal in discipline.marshals.all %}
-                <!-- Disable if not edit_card_data -->
-                <!-- has_auth(card, auth.slug) -->
                 <div class="checkbox">
                   <label>
                     <input type="checkbox" class="combatant-marshal" id="{{ discipline.slug}}-{{ marshal.slug }}"
                       data-endpoint="combatant-warrant" data-discipline="{{ discipline.slug }}"
-                      data-marshal="{{ marshal.slug }}">
+                      data-marshal="{{ marshal.slug }}" {% if not write_marshal %}disabled{% endif %}>
                     {{ marshal.name }}
                   </label>
                 </div>

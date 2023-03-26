@@ -22,7 +22,7 @@ class Authorization(models.Model):
     class Meta:
         # Add a unique constraint for the combination of slug and discipline
         unique_together = ("slug", "discipline")
-    
+
     slug = models.SlugField(max_length=255, editable=False)
     name = models.CharField(max_length=255, null=False)
     is_primary = models.BooleanField(default=False, null=False)

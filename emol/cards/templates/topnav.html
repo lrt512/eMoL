@@ -2,99 +2,53 @@
 {% load permissions %}
 
 <nav class="navbar">
-    <div class="container-fluid">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
-            <i class="fa fa-bars fa-2"></i>
-          </button>
-            <a class="navbar-brand" href="/"><span><img src="{% static 'cards/images/ealdormere32.png' %}"/>&nbsp;eMoL</span></a>
-        </div>
-        <div class="collapse navbar-collapse" id="navbar">
-            <ul class="nav navbar-nav">
-                {% has_global_permission "read_combatant_info" as combatant_read_permission %}
-                {% if user.is_anonymous is False %}
-                    <li><a href="/" title="Home">
-                        <i class="fa fa-home fa-1-5x" aria-hidden="true"></i>
-                        <span class="collapsed">Home</span>
-                    </a></li>
-                    {% comment %}
-                    {% if user.has_role(None, 'edit_officer_info') %}
-                        <li><a href="/officer-list" title="Kingdom Officers">
-                            <i class="fa fa-user-circle-o fa-1-5x" aria-hidden="true"></i>
-                            <span class="collapsed">Officer List</span>
-                        </a></li>
-                    {% endif %}
-                    {% endcomment %}
-                    {% if combatant_read_permission %}
-                        <li><a href="/combatants" title="Combatants">
-                            <span class="icon-crossed-swords"></span>
-                            <span class="collapsed">Combatant List</span>
-                        </a></li>
-                    {% endif %}
-                    {% comment %}
-                    {% if user.can_issue_warrant_roster) %}
-                        <li><a href="/warrant-roster" title="Warrant Roster">
-                            <i class="fa fa-file-text-o fa-1-5x" aria-hidden="true"></i>
-                            <span class="collapsed">Warrant Roster</span>
-                        </a></li>
-                    {% endif %}
-                    {% if user.can_import_combatants) %}
-                        <li><a href="/import" title="Import Combatants">
-                            <i class="fa fa-upload fa-1-5x" aria-hidden="true"></i>
-                            <span class="collapsed">Import Combatants</span>
-                        </a></li>
-                    {% endif %}
-                    {% endcomment %}
-                    {% if user.is_admin %}
-                    <li><a href="#" title="Trigger Mailing" id="trigger-mail">
-                        <i class="fa fa-envelope" aria-hidden="true"></i>
-                        <span class="collapsed">Trigger Mailing</span>
-                    </a></li>
-                    {% endif %}
-                {% endif %}
-            </ul>
-
-            <ul class="nav navbar-nav  navbar-right">
-              {% if user.is_superuser %}
-              <li><a href="/admin" title="Admin">
-                <i class="fa fa-gear fa-1-5x" aria-hidden="true"></i>
-                <span class="collapsed">Admin</span>
-              </a></li>
-              {% endif %}
-
-              {% if user.is_authenticated %}
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle no-change" data-toggle="dropdown">
-                        {{ user }}
-                        <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="/auth/logout" class="text-menu">Sign Out</a></li>
-                    </ul>
-                </li>
-                {% else %}
-                <li><a href="/auth/login">Sign In</a></li>
-                {% endif %}
-            </ul>
-        </div>
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <i class="fa fa-bars fa-2"></i>
+      </button>
+      <a class="navbar-brand" href="/"><span><img
+            src="{% static 'cards/images/ealdormere32.png' %}" />&nbsp;eMoL</span></a>
     </div>
-</nav>
+    <div class="collapse navbar-collapse" id="navbar">
+      <ul class="nav navbar-nav">
+        {% if request.user.is_anonymous is False %}
+        <li><a href="/" title="Home">
+            <i class="fa fa-home fa-1-5x" aria-hidden="true"></i>
+            <span class="collapsed">Home</span>
+          </a></li>
+        {% has_global_permission request.user "read_combatant_info" as read_combatant_info %}
+        {% if read_combatant_info %}
+        <li><a href="/combatants" title="Combatants">
+            <span class="icon-crossed-swords"></span>
+            <span class="collapsed">Combatant List</span>
+          </a></li>
+        {% endif %}
+        {% endif %}
+      </ul>
 
-{% if user is defined and not user.is_anonymous %}
-<script>
-    $(document).ready(function()
-    {
-        $('#trigger-mail').click(function()
-        {
-            $.ajax({
-                method: 'POST',
-                url: '/api/cron/mail',
-                success: function()
-                {
-                    alert('mail!');
-                }
-            })
-        });
-    });
-</script>
-{% endif %}
+      <ul class="nav navbar-nav  navbar-right">
+        {% if request.user.is_superuser %}
+        <li><a href="/admin" title="Admin">
+            <i class="fa fa-gear fa-1-5x" aria-hidden="true"></i>
+            <span class="collapsed">Admin</span>
+          </a></li>
+        {% endif %}
+
+        {% if request.user.is_authenticated %}
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle no-change" data-toggle="dropdown">
+            {{ request.user }}
+            <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="/auth/logout" class="text-menu">Sign Out</a></li>
+          </ul>
+        </li>
+        {% else %}
+        <li><a href="/auth/login">Sign In</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

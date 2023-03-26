@@ -44,7 +44,10 @@ class WaiverViewSet(viewsets.ModelViewSet):
             waiver = Waiver.objects.get(combatant=combatant)
             waiver.date_signed = serializer.validated_data.get("date_signed")
         except Waiver.DoesNotExist:
-            waiver = Waiver(combatant=combatant, date_signed=serializer.validated_data.get("date_signed"))
+            waiver = Waiver(
+                combatant=combatant,
+                date_signed=serializer.validated_data.get("date_signed"),
+            )
         finally:
             waiver.save()
 

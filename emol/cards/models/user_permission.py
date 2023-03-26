@@ -1,9 +1,13 @@
+import logging
+
 from django.db import models
 
 from sso_user.models import SSOUser
 
 from .discipline import Discipline
 from .permission import Permission
+
+logger = logging.getLogger("cards")
 
 
 class UserPermission(models.Model):
@@ -29,7 +33,7 @@ class UserPermission(models.Model):
             )
 
     @classmethod
-    def user_has_permission(cls, user, permission, related=None):
+    def user_has_permission(cls, user, permission, discipline=None):
         """Check if the given user has a permission
 
         Args:
@@ -40,18 +44,34 @@ class UserPermission(models.Model):
         if user.is_anonymous:
             return False
 
-        # For now, all authed users have the power
-        return True
+        # if user.is_superuser:
+        #    return True
 
-        if user.is_superuser:
-            return True
+        try:
+            permission = Permission.find(permission)
+        except Permission.DoesNotExist:
+            logger.error(f"Permission {permission} does not exist")
+            return False
 
-        permission_obj = Permission.find(permission)
-        if hasattr(related, "discipline"):
-            discipline_obj = related.getattr("discipline")
-        else:
-            discipline_obj = Discipline.find(related)
+        logger.debug(f"Permission: %s for %s", permission, user)
+        if permission.is_global:
+            permit = cls.objects.filter(user=user, permission=permission).exists()
+            logger.debug("Is global permission")
+            logger.debug("Permission result: %s", permit)
+            return permit
 
-        return cls.objects.filter(
-            user=user, permission=permission_obj, discipline=discipline_obj
-        ).exists()
+        logger.debug("Is discipline permission")
+        try:
+            permit = cls.objects.filter(
+                user=user, permission=permission, discipline=discipline
+            ).exists()
+        except cls.DoesNotExist:
+            permit = False
+        except Exception as e:
+            logger.exception(
+                f"Error while checking permission {permission.name} for user {user.email}: {str(e)}"
+            )
+            permit = False
+
+        logger.debug("Permission result: %s", permit)
+        return permit

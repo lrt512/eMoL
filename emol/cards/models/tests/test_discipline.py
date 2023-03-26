@@ -2,6 +2,7 @@ from django.test import TestCase
 
 from cards.models.discipline import Discipline
 
+
 class DisciplineTestCase(TestCase):
     def setUp(self):
         Discipline.objects.create(name="Heavy Rapier", slug="heavy-rapier")

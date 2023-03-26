@@ -61,9 +61,7 @@ class Combatant(models.Model):
     last_update = models.DateTimeField(auto_now=True)
 
     accepted_privacy_policy = models.BooleanField(default=False)
-    privacy_acceptance_code = models.CharField(
-        max_length=32, unique=True, null=True
-    )
+    privacy_acceptance_code = models.CharField(max_length=32, unique=True, null=True)
 
     # Data columns that are not encrypted
     email = models.CharField(max_length=255, unique=True)
@@ -238,7 +236,5 @@ def membership_valid(self, on_date=None):
 @receiver(models.signals.post_save, sender=Combatant)
 def send_privacy_policy_email(sender, instance, created, **kwargs):
     if created and not instance.accepted_privacy_policy:
-        logger.debug(
-            f"Sending privacy policy email to {instance} ({instance.email})"
-        )
+        logger.debug(f"Sending privacy policy email to {instance} ({instance.email})")
         send_privacy_policy(instance)
