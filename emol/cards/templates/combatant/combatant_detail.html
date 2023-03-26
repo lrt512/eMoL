@@ -117,7 +117,7 @@
             <div class="row">
               <div class="col-md-2"></div>
               <div class="col-md-3">
-                {% has_permission request.user "write_authorizations" discipline as write_authorizations %}
+                {% has_permission request.user "write_marshal" discipline as write_marshal %}
                 {% for marshal in discipline.marshals.all %}
                 <div class="checkbox">
                   <label>

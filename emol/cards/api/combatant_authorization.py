@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from cards.api.permissions import CombatantAuthorizationPermission
 from cards.models.authorization import Authorization
 from cards.models.card import Card
 from cards.models.combatant import Combatant
@@ -32,7 +33,7 @@ class CombatantAuthorizationViewSet(GenericViewSet):
     lookup_field = "uuid"
 
     queryset = CombatantAuthorization.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CombatantAuthorizationPermission]
 
     def create(self, request):
         """

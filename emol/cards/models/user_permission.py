@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.db import models
 
 from sso_user.models import SSOUser
@@ -44,34 +45,24 @@ class UserPermission(models.Model):
         if user.is_anonymous:
             return False
 
-        # if user.is_superuser:
-        #    return True
+        if getattr(settings, "NO_ENFORCE_PERMISSIONS", False):
+            return True
 
         try:
             permission = Permission.find(permission)
         except Permission.DoesNotExist:
-            logger.error(f"Permission {permission} does not exist")
+            logger.error(f"Permission '%s' does not exist", permission)
             return False
 
-        logger.debug(f"Permission: %s for %s", permission, user)
         if permission.is_global:
-            permit = cls.objects.filter(user=user, permission=permission).exists()
-            logger.debug("Is global permission")
-            logger.debug("Permission result: %s", permit)
-            return permit
+            return cls.objects.filter(user=user, permission=permission).exists()
 
-        logger.debug("Is discipline permission")
         try:
-            permit = cls.objects.filter(
-                user=user, permission=permission, discipline=discipline
+            obj = Discipline.find(discipline)
+            return UserPermission.objects.filter(
+                user=user, permission=permission, discipline=obj
             ).exists()
         except cls.DoesNotExist:
-            permit = False
-        except Exception as e:
-            logger.exception(
-                f"Error while checking permission {permission.name} for user {user.email}: {str(e)}"
-            )
-            permit = False
+            logger.error("Discipline '%s' does not exist", discipline)
 
-        logger.debug("Permission result: %s", permit)
-        return permit
+        return False

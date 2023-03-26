@@ -21,32 +21,71 @@ class CombatantInfoPermission(permissions.BasePermission):
     WRITE_PERMISSION = "write_combatant_info"
 
 
+class CombatantAuthorizationPermission(permissions.BasePermission):
+    """Check if user can read or write combatant authorizations"""
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        data = request.data
+        discipline_slug = data.get("discipline")
+        if not discipline_slug:
+            return False
+        return UserPermission.user_has_permission(
+            request.user,
+            CombatantAuthorizationPermission.WRITE_PERMISSION,
+            discipline_slug,
+        )
+
+    WRITE_PERMISSION = "write_authorizations"
+
+
+class CombatantMarshalPermission(permissions.BasePermission):
+    """Check if user can read or write combatant warrants"""
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        data = request.data
+        discipline_slug = data.get("discipline")
+        if not discipline_slug:
+            return False
+        return UserPermission.user_has_permission(
+            request.user, CombatantMarshalPermission.WRITE_PERMISSION, discipline_slug
+        )
+
+    WRITE_PERMISSION = "write_marshal"
+
+
 class WaiverDatePermission(permissions.BasePermission):
     """Check if user can read or write waiver date"""
 
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
-            return UserPermission.user_has_permission(
-                request.user, WaiverDatePermission.READ_PERMISSION
-            )
+            return True
 
         return UserPermission.user_has_permission(
             request.user, WaiverDatePermission.WRITE_PERMISSION
         )
 
-    READ_PERMISSION = "read_waiver_date"
     WRITE_PERMISSION = "write_waiver_date"
 
 
 class CardDatePermission(permissions.BasePermission):
     """Check if user can write card date"""
 
-    def has_object_permission(self, request, view, obj):
-        if request.method == "PUT":
-            return UserPermission.user_has_permission(
-                request.user, CardDatePermission.WRITE_PERMISSION
-            )
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
 
-        return False
+        data = request.data
+        discipline_slug = data.get("discipline_slug")
+        if not discipline_slug:
+            return False
+        return UserPermission.user_has_permission(
+            request.user, CardDatePermission.WRITE_PERMISSION, discipline_slug
+        )
 
     WRITE_PERMISSION = "write_card_date"

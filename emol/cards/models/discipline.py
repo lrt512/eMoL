@@ -55,7 +55,7 @@ class Discipline(models.Model):
             return discipline
 
         query = models.Q(slug=discipline) | models.Q(name=discipline)
-        discipline = cls.objects.filter(discipline=discipline).filter(query).first()
+        discipline = cls.objects.filter(query).first()
         if discipline is None:
             raise cls.DoesNotExist(f"No discipline found for {discipline}")
 

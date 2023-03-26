@@ -1,11 +1,12 @@
-from django.test import TestCase
-from django.core.exceptions import ValidationError
-from django.db.utils import IntegrityError
 from datetime import datetime
 
+from django.core.exceptions import ValidationError
+from django.db.utils import IntegrityError
+from django.test import TestCase
+
 from cards.models.authorization import Authorization
-from cards.models.discipline import Discipline
 from cards.models.combatant import Combatant
+from cards.models.discipline import Discipline
 
 
 class CombatantModelTestCase(TestCase):

@@ -58,7 +58,7 @@ class Authorization(models.Model):
         discipline = Discipline.find(discipline)
 
         query = models.Q(slug=authorization) | models.Q(name=authorization)
-        authorization = cls.objects.filter(discipline=discipline).filter(query).first()
+        authorization = cls.objects.filter(query, discipline=discipline).first()
         if authorization is None:
             raise cls.DoesNotExist(
                 f"No authorization found for discipline {discipline.slug} and authorization {authorization}"
