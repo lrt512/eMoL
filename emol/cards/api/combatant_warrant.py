@@ -34,7 +34,7 @@ class CombatantWarrantViewSet(GenericViewSet):
     queryset = CombatantWarrant.objects.all()
     permission_classes = [CombatantMarshalPermission]
 
-    def create(self, request):
+    def create(self, request, discipline):
         """
         Add a warrant to a combatant's card for a discipline
         If the card doesn't exist for the specified discipline, create one.
@@ -77,7 +77,7 @@ class CombatantWarrantViewSet(GenericViewSet):
         serializer.save()
         return Response(status=status.HTTP_200_OK, data=serializer.data)
 
-    def destroy(self, request, uuid):
+    def destroy(self, request, uuid, *args, **kwargs):
         """
         Deletes the given CombatantWarrant
         If the related card has no more warrants or authorizations left, delete that too

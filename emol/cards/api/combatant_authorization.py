@@ -35,7 +35,7 @@ class CombatantAuthorizationViewSet(GenericViewSet):
     queryset = CombatantAuthorization.objects.all()
     permission_classes = [CombatantAuthorizationPermission]
 
-    def create(self, request):
+    def create(self, request, discipline):
         """
         Add an authorization to a combatant's card for a discipline
         If the card doesn't exist for the specified discipline, create one.

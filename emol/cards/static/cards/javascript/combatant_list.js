@@ -52,10 +52,6 @@
                     submit_combatant_info(function () {
                         save_button();
                     });
-                } else if ($("#waiver-tab").hasClass("active")) {
-                    submit_waiver_info(function () {
-                        save_button();
-                    });
                 }
             });
 
@@ -79,6 +75,9 @@
                     fetch_waiver_date();
                     save_button();
                 },
+                error: function (jqXHR, status, error) {
+                    toastr.error("Error loading combatant: " + error);
+                }
             });
         });
     }
@@ -97,6 +96,9 @@
                 populate(data, null);
                 $("#waiver-date-form").validate({ ignore: "" });
             },
+            error: function (jqXHR, status, error) {
+                toastr.error("Error fetching waiver date: " + error);
+            }
         });
     }
 
@@ -142,6 +144,9 @@
                     });
                 });
             },
+            error: function (jqXHR, status, error) {
+                toastr.error("Error fetching combatant cards: " + error);
+            }
         });
     }
 
@@ -183,46 +188,14 @@
             contentType: "application/json; charset=UTF-8",
             headers: { "X-CSRFToken": csrf_token() },
             success: function (response, status, xhr) {
+                toastr.success("Combatant information saved");
                 $("#uuid").val(xhr.responseJSON.uuid);
                 callback();
                 fetch_waiver_date();
             },
-        });
-    }
-
-    /**
-     * Submit the form via AJAX and invoke a callback function on success
-     * @param method {string} The HTTP method to use
-     * @param callback {function} The callback function to call
-     */
-    function submit_waiver_info(callback) {
-        var $form = $("#waiver-date-form"),
-            validation_error = $("#validation-error-notice");
-
-        validation_error.hide();
-        if (false === $form.valid()) {
-            validation_error.show();
-            return;
-        }
-
-        var uuid = $("#uuid").val(),
-            data = {
-                date_signed: $("#edit-waiver-date_signed").val(),
-                expiration_date: "1970-01-01",
-                uuid: uuid,
+            error: function (xhr, status, error) {
+                toastr.error("Error saving combatant information: " + error);
             }
-
-        $.ajax({
-            url: waiver_url(uuid),
-            method: "PUT",
-            data: JSON.stringify(data),
-            dataType: "json",
-            contentType: "application/json; charset=UTF-8",
-            headers: { "X-CSRFToken": csrf_token() },
-            success: function (response, status, xhr) {
-                $("#edit-waiver-expiration_date").val(xhr.responseJSON.expiration_date);
-                callback();
-            },
         });
     }
 
@@ -234,8 +207,9 @@
      * @param $checkbox {jQuery} The (un)checked checkbox
      */
     function auth_warrant_clicked($checkbox) {
-        var url = "/api/" + $checkbox.data("endpoint") + "/",
-            is_checked = $checkbox.is(":checked");
+        var url = "/api/" + $checkbox.data("endpoint") + "/" + $checkbox.data("discipline") + "/",
+            is_checked = $checkbox.is(":checked"),
+            thing = $checkbox.data("authorization") || $checkbox.data("marshal");
 
         // If checked, we'll POST a new combatant authorization or warrant
         // if unchecked, DELETE by combatant authorization or warrant UUID
@@ -257,17 +231,28 @@
                 headers: { "X-CSRFToken": csrf_token() },
                 success: function (response) {
                     $checkbox.data("uuid", response.uuid);
+                    toastr.success("Added " + thing);
                 },
+                error: function (xhr, status, error) {
+                    toastr.error("Error adding " + thing + ": " + error);
+                    $checkbox.prop("checked", false);
+                }
             });
         } else {
             url += $checkbox.data("uuid") + "/";
+
             $.ajax({
                 method: "DELETE",
                 url: url,
                 headers: { "X-CSRFToken": csrf_token() },
                 success: function (response) {
                     $checkbox.removeData("uuid");
+                    toastr.success("Removed " + thing);
                 },
+                error: function (xhr, status, error) {
+                    toastr.error("Error removing " + thing + ": " + error);
+                    $checkbox.prop("checked", true);
+                }
             });
         }
     }
@@ -310,8 +295,12 @@
                 method: "DELETE",
                 headers: { "X-CSRFToken": csrf_token() },
                 success: function () {
+                    toastr.success("Combatant deleted");
                     dataTable.ajax.reload(false);
                 },
+                error: function (xhr, status, error) {
+                    toastr.error("Error deleting combatant: " + error);
+                }
             });
         });
 
@@ -378,8 +367,11 @@
             data: { combatant_uuid: data.uuid },
             headers: { "X-CSRFToken": csrf_token() },
             success: function (response) {
-                console.info(response);
+                toastr.success("Privacy policy email sent");
             },
+            error: function (xhr, status, error) {
+                toastr.error("Error sending privacy policy email: " + error);
+            }
         });
     });
 
@@ -410,4 +402,22 @@
     $(document).on("shown.bs.tab", function () {
         save_button();
     });
+
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "200",
+        "hideDuration": "1000",
+        "timeOut": "3000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    }
 })(jQuery);

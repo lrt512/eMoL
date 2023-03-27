@@ -167,8 +167,12 @@
             contentType: 'application/json; charset=UTF-8',
             headers: { "X-CSRFToken": csrf_token() },
             success: function (response, status, xhr) {
+              toastr.success("Waiver date updated");
               $("#edit-waiver-expiration_date").val(xhr.responseJSON.expiration_date);
-            }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Error updating wavier: " + error);
+            },
           });
         });
 
@@ -192,7 +196,11 @@
             contentType: 'application/json; charset=UTF-8',
             headers: { "X-CSRFToken": csrf_token() },
             success: function (response, status, xhr) {
-            }
+              toastr.success("Card date updated");
+            },
+            error: function (xhr, status, error) {
+              toastr.error("Error updating card date: " + error);
+            },            
           });
         });
     });

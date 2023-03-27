@@ -27,11 +27,11 @@ class CombatantAuthorizationPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
-
-        data = request.data
-        discipline_slug = data.get("discipline")
+        
+        discipline_slug = view.kwargs.get('discipline')
         if not discipline_slug:
             return False
+
         return UserPermission.user_has_permission(
             request.user,
             CombatantAuthorizationPermission.WRITE_PERMISSION,
@@ -48,10 +48,10 @@ class CombatantMarshalPermission(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        data = request.data
-        discipline_slug = data.get("discipline")
+        discipline_slug = view.kwargs.get('discipline')
         if not discipline_slug:
             return False
+
         return UserPermission.user_has_permission(
             request.user, CombatantMarshalPermission.WRITE_PERMISSION, discipline_slug
         )
