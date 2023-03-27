@@ -40,9 +40,9 @@ class UserPermission(models.Model):
         Args:
             user: The user to check
             permission: The permission to check
-            related: Related object for non-global permissions
+            discipline: Discipline reference for non-global permissions
         """
-        if user.is_anonymous:
+        if not user or not user.is_authenticated:
             return False
 
         if getattr(settings, "NO_ENFORCE_PERMISSIONS", False):
@@ -54,15 +54,17 @@ class UserPermission(models.Model):
             logger.error(f"Permission '%s' does not exist", permission)
             return False
 
-        if permission.is_global:
-            return cls.objects.filter(user=user, permission=permission).exists()
+        filters = {
+            "user": user,
+            "permission": permission,
+        }
 
-        try:
-            obj = Discipline.find(discipline)
-            return UserPermission.objects.filter(
-                user=user, permission=permission, discipline=obj
-            ).exists()
-        except cls.DoesNotExist:
-            logger.error("Discipline '%s' does not exist", discipline)
+        if not permission.is_global:
+            try:
+                discipline = Discipline.find(discipline)
+                filters["discipline"] = discipline
+            except Discipline.DoesNotExist:
+                logger.error("Discipline '%s' does not exist", discipline)
+                return False
 
-        return False
+        return UserPermission.objects.filter(**filters).exists()

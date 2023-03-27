@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Model permissions for access control."""
 from django.db import models
+from django.utils.text import slugify
 
 __all__ = ["Permission"]
 
@@ -91,6 +92,11 @@ class Permission(models.Model):
     def __str__(self):
         return f"<Permission: {self.name}>"
 
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
     @classmethod
     def find(cls, permission):
         """Look up a permission.
@@ -113,8 +119,10 @@ class Permission(models.Model):
             return permission
 
         if isinstance(permission, str):
-            return Permission.objects.get(slug=permission)
-        elif isinstance(permission, int):
+            query = models.Q(slug=permission) | models.Q(name=permission)
+            return Permission.objects.get(query)
+
+        if isinstance(permission, int):
             return Permission.objects.get(id=permission)
-        else:
-            raise ValueError("Can't determine permission")
+
+        raise Permission.DoesNotExist()

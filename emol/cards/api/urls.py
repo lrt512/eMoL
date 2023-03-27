@@ -11,8 +11,12 @@ from .waiver import WaiverViewSet
 api_router = routers.SimpleRouter()
 api_router.register(r"combatant-list", CombatantListViewSet)
 api_router.register(r"combatant", CombatantViewSet)
-api_router.register(r"combatant-authorization/(?P<discipline>[-\w]+)", CombatantAuthorizationViewSet)
-api_router.register(r"combatant-warrant/(?P<discipline>[-\w]+)", CombatantWarrantViewSet)
+api_router.register(
+    r"combatant-authorization/(?P<discipline>[-\w]+)", CombatantAuthorizationViewSet
+)
+api_router.register(
+    r"combatant-warrant/(?P<discipline>[-\w]+)", CombatantWarrantViewSet
+)
 api_router.register(r"combatant-cards", CardViewSet)
 api_router.register(r"waiver", WaiverViewSet)
 api_router.register(r"card-date", CardDateViewSet)

@@ -31,7 +31,7 @@ class Discipline(models.Model):
         return f"<Discipline: {self.name}>"
 
     def save(self, *args, **kwargs):
-        if not self.pk:
+        if not self.pk and not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
@@ -55,8 +55,4 @@ class Discipline(models.Model):
             return discipline
 
         query = models.Q(slug=discipline) | models.Q(name=discipline)
-        discipline = cls.objects.filter(query).first()
-        if discipline is None:
-            raise cls.DoesNotExist(f"No discipline found for {discipline}")
-
-        return discipline
+        return cls.objects.get(query)

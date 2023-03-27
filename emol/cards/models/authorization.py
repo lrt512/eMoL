@@ -34,7 +34,7 @@ class Authorization(models.Model):
         return f"<Authorization: {self.discipline.slug}.{self.slug}>"
 
     def save(self, *args, **kwargs):
-        if not self.pk:
+        if not self.pk and not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
@@ -56,12 +56,5 @@ class Authorization(models.Model):
             return authorization
 
         discipline = Discipline.find(discipline)
-
         query = models.Q(slug=authorization) | models.Q(name=authorization)
-        authorization = cls.objects.filter(query, discipline=discipline).first()
-        if authorization is None:
-            raise cls.DoesNotExist(
-                f"No authorization found for discipline {discipline.slug} and authorization {authorization}"
-            )
-
-        return authorization
+        return cls.objects.get(query, discipline=discipline)

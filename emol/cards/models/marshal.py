@@ -53,18 +53,5 @@ class Marshal(models.Model):
             return marshal
 
         discipline = Discipline.find(discipline)
-
-        if isinstance(marshal, str):
-            try:
-                return (
-                    Marshal.objects.filter(discipline=discipline)
-                    .filter(slug=marshal)
-                    .get()
-                )
-            except Marshal.DoesNotExist:
-                pass
-
-            # Let the DoesNotExist fly if not found here
-            return (
-                Marshal.objects.filter(discipline=discipline).filter(name=marshal).get()
-            )
+        query = models.Q(slug=marshal) | models.Q(name=marshal)
+        return cls.objects.get(query, discipline=discipline)
