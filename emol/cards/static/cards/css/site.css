@@ -289,3 +289,15 @@ option.combatant-auth:disabled {
   pointer-events: none;
   color: silver;
 }
+.top-space-xl {
+    margin-top:32px;
+}
+.top-space-lg {
+    margin-top:16px;
+}
+.top-space-md {
+    margin-top:8px;
+}
+.top-space-sm {
+    margin-top:4px;
+}

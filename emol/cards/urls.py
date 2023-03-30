@@ -2,6 +2,8 @@
 from django.conf import settings
 from django.contrib.admin import site
 from django.urls import include, path
+from django.views.generic import TemplateView
+from django.conf.urls.static import static
 
 from cards.api.urls import urlpatterns as api_urlpatterns
 from cards.views import combatant, home, privacy
@@ -26,7 +28,23 @@ urlpatterns = [
     path("api/", include(api_urlpatterns)),
 ]
 
-if settings.DEBUG:
-    from django.conf.urls.static import static
+# Custom error handlers
+urlpatterns += [
+    path(
+        "429/",
+        TemplateView.as_view(template_name="429.html"),
+        name="too_many_requests",
+    ),
+    path(
+        "404/",
+        TemplateView.as_view(template_name="404.html"),
+        name="not_found",
+    ),
+    path(
+        "robots.txt",
+        TemplateView.as_view(template_name="robots.txt", content_type="text/plain"),
+        name="not_found",
+    ),
+]
 
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
