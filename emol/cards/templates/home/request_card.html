@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 
 {% block body %}
-<div class="row">
-  <div class="col-md-6 col-lg-offset-3">
+<div class="row top-space-xl">
+  <div class="col-md-2"></div>
+  <div class="col-md-8">
     <div>
       Enter your email address below and click the Request Card button.
       You will be sent an email with your link for retrieving your authorization card.
@@ -13,14 +14,16 @@
 <form method="post">
   {% csrf_token %}
   <div class="row top-space-lg">
-    <div class="col-md-4 col-lg-offset-4 content-centered">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 content-centered">
       <input id="request-card-email" name="request-card-email" type="email" placeholder="Email address"
         class="input-round" required />
       <div id="request-card-message-text" class="error message-text">{{ message }}</div>
     </div>
   </div>
-  <div class="row top-space-lg">
-    <div class="col-md-4 col-lg-offset-4 content-centered">
+  <div class="row top-space-sm">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 content-centered">
       <input type="submit" id="request-card" class="btn btn-lg btn-lg-width btn-primary" value="Request Card" />
     </div>
   </div>
