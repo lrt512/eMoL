@@ -71,8 +71,8 @@ class Reminder(models.Model):
                 sent = self.content_object.send_reminder(self)
 
             if sent:
-                # self.delete()
-                logger.info("would have deleted reminder")
+                logger.debug("Delete reminder %s", self)
+                self.delete()
         except model.DoesNotExist:
             logger.error("%s instance for ID %s does not exist", model, self.object_id)
             return False

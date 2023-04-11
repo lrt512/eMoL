@@ -90,10 +90,15 @@ class Card(models.Model, DirtyFieldsMixin, ReminderMixin):
         That is, the self.card + CARD_DURATION years
 
         Returns:
-            Date of the card's expiry date as a string
+            Card's expiry date as a datetime.date
 
         """
-        return add_years(self.date_issued, 2).strftime(DATE_FORMAT)
+        return add_years(self.date_issued, 2)
+
+    @property
+    def expiration_date_str(self):
+        """Return the expiration date as a string"""
+        return self.expiration_date.strftime(DATE_FORMAT)
 
     def send_expiry(self, reminder):
         if not isinstance(reminder.content_object, Card):

@@ -21,7 +21,7 @@ def send_card_reminder(reminder):
         template = EMAIL_TEMPLATES.get("card_reminder")
         body = template.get("body").format(
             expiry_days=reminder.days_to_expiry,
-            expiry_date=card.expiration_date,
+            expiry_date=card.expiration_date_str,
             discipline=card.discipline.name,
         )
         return Emailer.send_email(
@@ -66,7 +66,7 @@ def send_waiver_reminder(reminder):
         template = EMAIL_TEMPLATES.get("waiver_reminder")
         body = template.get("body").format(
             expiry_days=reminder.days_to_expiry,
-            expiry_date=waiver.expiration_date,
+            expiry_date=waiver.expiration_date_str,
         )
         return Emailer.send_email(waiver.combatant.email, template.get("subject"), body)
     except AttributeError:
