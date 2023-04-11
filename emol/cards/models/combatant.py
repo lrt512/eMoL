@@ -157,17 +157,6 @@ class Combatant(models.Model):
     # named tuple for return values from update_info
     UpdateInfoReturn = namedtuple("UpdateInfoReturn", ["sca_name", "email"])
 
-    def get_card(self, discipline, create=False):
-        discipline = Discipline.find(discipline)
-
-        for card in self.cards:
-            if card.discipline is discipline:
-                return card
-
-        if create is True:
-            card = Card.create(self, discipline)
-            return card
-
     @property
     def card_url(self):
         """Card URL for this combatant.

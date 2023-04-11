@@ -16,6 +16,11 @@ class CombatantWarrant(models.Model):
     class Meta:
         db_table = "cards_combatant_warrant"
         indexes = [models.Index(fields=["uuid"])]
+        constraints = [
+            models.UniqueConstraint(
+                name="combatant_warrant", fields=["card", "marshal"]
+            )
+        ]
 
     card = models.ForeignKey(Card, on_delete=models.CASCADE)
     marshal = models.ForeignKey(Marshal, on_delete=models.DO_NOTHING)

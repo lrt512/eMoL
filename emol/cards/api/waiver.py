@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import serializers, status, viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.renderers import JSONRenderer
@@ -8,6 +10,8 @@ from cards.models.combatant import Combatant
 from cards.models.waiver import Waiver
 
 from .permissions import WaiverDatePermission
+
+logger = logging.getLogger("cards")
 
 
 class WaiverSerializer(ModelSerializer):
@@ -49,6 +53,7 @@ class WaiverViewSet(viewsets.ModelViewSet):
                 date_signed=serializer.validated_data.get("date_signed"),
             )
         finally:
+            logger.debug("save waiver")
             waiver.save()
 
         response_data = {

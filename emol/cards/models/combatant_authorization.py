@@ -12,6 +12,11 @@ class CombatantAuthorization(models.Model):
     class Meta:
         db_table = "cards_combatant_authorization"
         indexes = [models.Index(fields=["uuid"])]
+        constraints = [
+            models.UniqueConstraint(
+                name="combatant_authorization", fields=["card", "authorization"]
+            )
+        ]
 
     card = models.ForeignKey("Card", on_delete=models.CASCADE)
     authorization = models.ForeignKey("Authorization", on_delete=models.DO_NOTHING)

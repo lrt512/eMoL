@@ -3,6 +3,7 @@ from django.conf import settings
 from django.shortcuts import render
 from django.core.cache import cache
 
+
 class GlobalThrottleMiddleware:
     """Global throttle middleware
 
@@ -15,7 +16,7 @@ class GlobalThrottleMiddleware:
     Usage:
     1) This middleware must come after these middleware classes:
 
-    django.contrib.sessions.middleware.SessionMiddleware 
+    django.contrib.sessions.middleware.SessionMiddleware
     django.contrib.auth.middleware.AuthenticationMiddleware
 
     2) Define a 429.html template to display when the throttle is triggered.
@@ -24,6 +25,7 @@ class GlobalThrottleMiddleware:
     GLOBAL_THROTTLE_LIMIT: the maximum number of requests allowed within the duration
     GLOBAL_THROTTLE_WINDOW: the duration of the throttling window in seconds
     """
+
     def __init__(self, get_response):
         self.get_response = get_response
         self.request_limit = getattr(settings, "GLOBAL_THROTTLE_LIMIT", 5)
@@ -31,7 +33,7 @@ class GlobalThrottleMiddleware:
 
     def maybe_throttle(self, request):
         """Determine if we should throttle the calling IP address
-        
+
         Returns True if the IP address should be throttled, False otherwise.
         """
         if request.user.is_authenticated:
@@ -46,7 +48,7 @@ class GlobalThrottleMiddleware:
 
         cache.set(cache_key, request_count + 1, self.request_window)
         return False
-        
+
     def __call__(self, request):
         """Handle the request and throttle if necessary"""
         if self.maybe_throttle(request):

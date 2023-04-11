@@ -1,11 +1,20 @@
+import logging
+
+from dirtyfields import DirtyFieldsMixin
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from cards.utility.date import DATE_FORMAT, add_years, today
+from cards.mail import send_waiver_expiry, send_waiver_reminder
 
-from .reminder_email import ReminderEmail
+from .reminder import Reminder
+from .reminder_mixin import ReminderMixin, DirtyModelReminderMeta
+
+logger = logging.getLogger("cards")
 
 
-class Waiver(models.Model):
+class Waiver(models.Model, DirtyFieldsMixin, ReminderMixin):
     combatant = models.OneToOneField("Combatant", on_delete=models.CASCADE)
     date_signed = models.DateField(null=False, blank=False)
 
@@ -24,7 +33,21 @@ class Waiver(models.Model):
             Date of the card's expiry date as a string
 
         """
-        return add_years(self.date_signed, 7)
+        return add_years(self.date_signed, 7).strftime(DATE_FORMAT)
+
+    def send_expiry(self, reminder):
+        if not isinstance(reminder.content_object, Waiver):
+            logger.error("Reminder %s is not a waiver", reminder)
+            return False
+
+        return send_waiver_expiry(reminder)
+
+    def send_reminder(self, reminder):
+        if not isinstance(reminder.content_object, Waiver):
+            logger.error("Reminder %s is not a waiver", reminder)
+            return False
+
+        return send_waiver_reminder(reminder)
 
     @property
     def expiry_days(self):
@@ -52,12 +75,12 @@ class Waiver(models.Model):
         self.date_signed = date_signed or today()
         self.save()
 
-        # Remove all existing ReminderEmail objects
-        ReminderEmail.objects.filter(waiver=self).delete()
 
-        # Create reminders for the 60, 30, and 14 days before expiration
-        for days_before_expiry in [60, 30, 14]:
-            ReminderEmail.create_for_waiver(self, days_before_expiry)
-
-        # And create an expiry reminder
-        ReminderEmail.create_for_waiver(self, 0)
+@receiver(post_save, sender=Waiver)
+def update_reminders(sender, instance, created, **kwargs):
+    if created:
+        Reminder.create_or_update_reminders(instance)
+    elif "date_signed" in instance.get_dirty_fields(check_relationship=True):
+        Reminder.create_or_update_reminders(instance)
+    else:
+        logger.debug("Waiver post_save signal ignored")

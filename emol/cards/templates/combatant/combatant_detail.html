@@ -88,8 +88,8 @@
               </label>
               <div class="col-md-2">
                 {% has_permission request.user "write_card_date" discipline as write_card_date %}
-                <input type="text" id="edit-combatant-card_issued_{{ discipline.slug }}"
-                  name="card_issued_{{ discipline.slug }}" value="{% firstof card.card_issued '' %}"
+                <input type="text" id="edit-combatant-date_issued_{{ discipline.slug }}"
+                  name="date_issued_{{ discipline.slug }}" value="{% firstof card.date_issued '' %}"
                   class="form-control card-date" data-discipline="{{ discipline.slug }}" readonly 
                   {% if not write_card_date %}disabled{% endif %} />
                 <input type="hidden" id="edit-combatant-card_uuid_{{ discipline.slug }}"
@@ -183,7 +183,7 @@
             uuid = $("#uuid").val(),
             url = '/api/card-date/' + uuid + "/",
             data = {
-              card_issued: $(this).val(),
+              date_issued: $(this).val(),
               uuid: uuid,
               discipline_slug: discipline,
             };

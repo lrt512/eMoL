@@ -64,7 +64,7 @@ class CombatantWarrantViewSet(GenericViewSet):
         card, created = Card.objects.get_or_create(
             combatant=combatant,
             discipline=discipline,
-            defaults={"card_issued": today()},
+            defaults={"date_issued": today()},
         )
 
         serializer = CombatantWarrantSerializer(

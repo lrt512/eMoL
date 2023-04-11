@@ -31,3 +31,7 @@ class CombatantModelTestCase(TestCase):
             self.combatant.waiver_expires
             == self.combatant.waiver_date + self.combatant.waiver_duration
         )
+
+    # A test to verify that the privacy policy code is generated correctly
+    def test_combatant_privacy_policy_code(self):
+        assert self.combatant.privacy_policy_code == "JtB"

@@ -119,7 +119,7 @@
                 data.forEach((card) => {
                     var discipline = card.discipline.slug;
                     var discipline_selector = "[data-discipline=" + discipline + "]";
-                    $('[name=card_issued_' + discipline + ']').val(card.card_issued);
+                    $('[name=date_issued_' + discipline + ']').val(card.date_issued);
                     $('[name=card_uuid_' + discipline + ']').val(card.uuid);
 
                     card.authorizations.forEach((auth) => {
