@@ -27,10 +27,10 @@ class UserPermission(models.Model):
 
     def __str__(self):
         if self.discipline:
-            return f"<UserPermission: {self.user.email} - {self.permission.name} ({self.discipline.name})"
+            return f"<UserPermission: {self.user.email} - {self.permission.name} ({self.discipline.name})>"
         else:
             return (
-                f"<UserPermission: {self.user.email} - {self.permission.name} (global)"
+                f"<UserPermission: {self.user.email} - {self.permission.name} (global)>"
             )
 
     @classmethod

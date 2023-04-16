@@ -17,19 +17,18 @@ def send_card_reminder(reminder):
         reminder: A Reminder object
     """
     try:
-        card = reminder.content_object                       
+        card = reminder.content_object
         template = EMAIL_TEMPLATES.get("card_reminder")
         body = template.get("body").format(
             expiry_days=reminder.days_to_expiry,
             expiry_date=card.expiration_date_str,
             discipline=card.discipline.name,
         )
-        return Emailer.send_email(
-            card.combatant.email, template.get("subject"), body
-        )
+        return Emailer.send_email(card.combatant.email, template.get("subject"), body)
     except AttributeError:
         logger.error("Reminder %s does not have a card", reminder)
         return False
+
 
 def send_card_expiry(reminder):
     """Send a card expiration notification to a combatant
@@ -40,17 +39,16 @@ def send_card_expiry(reminder):
         reminder: A Reminder object
     """
     try:
-        card = reminder.content_object                       
+        card = reminder.content_object
         template = EMAIL_TEMPLATES.get("card_expiry")
         body = template.get("body").format(
             discipline=card.discipline.name,
         )
-        return Emailer.send_email(
-            card.combatant.email, template.get("subject"), body
-        )
+        return Emailer.send_email(card.combatant.email, template.get("subject"), body)
     except AttributeError:
         logger.error("Reminder %s does not have a card", reminder)
         return False
+
 
 def send_waiver_reminder(reminder):
     """Send a waiver reminder notice to a combatant.
@@ -62,7 +60,7 @@ def send_waiver_reminder(reminder):
 
     """
     try:
-        waiver = reminder.content_object                       
+        waiver = reminder.content_object
         template = EMAIL_TEMPLATES.get("waiver_reminder")
         body = template.get("body").format(
             expiry_days=reminder.days_to_expiry,
@@ -83,7 +81,7 @@ def send_waiver_expiry(reminder):
         reminder: A Reminder object
     """
     try:
-        waiver = reminder.content_object                       
+        waiver = reminder.content_object
         template = EMAIL_TEMPLATES.get("waiver_expiry")
         body = template.get("body").format(
             expiry_days=reminder.days_to_expiry,
@@ -93,6 +91,7 @@ def send_waiver_expiry(reminder):
     except AttributeError:
         logger.error("Reminder %s does not have a waiver", reminder)
         return False
+
 
 def send_info_update(combatant, update_request):
     """Send a information update link to a combatant.

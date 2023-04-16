@@ -7,13 +7,14 @@ from dirtyfields import DirtyFieldsMixin
 
 class ReminderMixinMeta(ABCMeta):
     """Metaclass for ReminderMixin"""
+
     pass
 
 
 class ReminderMixin:
     """Base class for models that have reminders
-    
-    This really should be an abstract class but the 
+
+    This really should be an abstract class but the
     metaclass madness is intense.
     """
 

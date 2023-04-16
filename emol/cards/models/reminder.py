@@ -24,8 +24,12 @@ class Reminder(models.Model):
         unique_together = ("content_type", "object_id", "days_to_expiry")
 
     def __str__(self):
-        s = 'expiry' if self.days_to_expiry == 0 else f"{self.days_to_expiry} day reminder"
-        return f"<{self.content_object.__class__.__name__}: {self.content_object.combatant.name} - {s}"
+        s = (
+            "expiry"
+            if self.days_to_expiry == 0
+            else f"{self.days_to_expiry} day reminder"
+        )
+        return f"<{self.content_object.__class__.__name__}: {self.content_object.combatant.name} - {s}>"
 
     @classmethod
     def create_or_update_reminders(cls, instance):
@@ -62,7 +66,6 @@ class Reminder(models.Model):
             return
 
         model = self.content_type.model_class()
-        print(self.days_to_expiry)
         try:
             sent = False
             if self.days_to_expiry == 0:

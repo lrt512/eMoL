@@ -1,9 +1,13 @@
+from datetime import date
+import logging
+
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from emailer import Emailer
-
 from cards.models.reminder import Reminder
+from cards.utility.date import DATE_FORMAT
+
+logger = logging.getLogger("cards")
 
 
 class Command(BaseCommand):
@@ -12,7 +16,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         due_reminders = Reminder.objects.filter(due_date__lte=timezone.now().date())
         count = due_reminders.count()
-        self.stdout.write(self.style.SUCCESS(f"Found {count} reminders to send"))
+        logger.info(
+            f"Reminders for {date.today().strftime(DATE_FORMAT)}: Found {count} to send"
+        )
 
         if count == 0:
             return
@@ -22,4 +28,4 @@ class Command(BaseCommand):
                 if reminder.send_email():
                     reminder.delete()
 
-        self.stdout.write(self.style.SUCCESS("Reminders sent"))
+        logger.info("Reminders sent")

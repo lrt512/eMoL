@@ -34,12 +34,14 @@ class Emailer:
 
         """
         if settings.SEND_EMAIL is False:
-            logger.info(f"Not sending email to {recipient}")
+            logger.info("Not sending email to %s", recipient)
             logger.info(subject)
             logger.info(body)
             return True
+        else:
+            logger.info("Sending email to %s: %s", recipient, subject)
 
-        sender = settings.MAIL_DEFAULT_SENDER
+        sender = f"Ealdormere eMoL <{settings.MAIL_DEFAULT_SENDER}>"
         aws_region = settings.AWS_REGION
 
         client = boto3.client("ses", region_name=aws_region)
