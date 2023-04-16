@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
 from cards.models.combatant import Combatant
+from cards.models.privacy_policy import PrivacyPolicy
 
 logger = logging.getLogger("cards")
 
@@ -23,6 +24,7 @@ def privacy_policy(request, code=None):
     except Combatant.DoesNotExist:
         combatant = None
 
+    context = {"policy": PrivacyPolicy.latest_text()}
     if request.method == "POST":
         if combatant is None:
             raise HttpResponseBadRequest
@@ -34,7 +36,7 @@ def privacy_policy(request, code=None):
             combatant.delete()
             return render(request, "privacy/privacy_declined.html", {})
     elif request.method == "GET":
-        context = {"code": code if combatant is not None else None}
+        context["code"] = code if combatant is not None else None
         if combatant is not None:
             logger.debug(f"privacy acceptance for combatant {combatant}")
 

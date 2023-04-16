@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% load markdown %}
+
+{% block title %}Privacy Policy{% endblock %}
+
 {% block body %}
 <div class="row form-group">
   <div class="col-md-12">
@@ -8,7 +12,7 @@
 </div>
 <div class="row form-group">
   <div class="col-md-12">
-    We promise to sell your info to anyone who offers us money
+    {{ policy|markdown|safe }}
   </div>
 </div>
 
