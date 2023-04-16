@@ -66,7 +66,7 @@ class CombatantAuthorizationViewSet(GenericViewSet):
         card, created = Card.objects.get_or_create(
             combatant=combatant,
             discipline=discipline,
-            defaults={"card_issued": today()},
+            defaults={"date_issued": today()},
         )
 
         logger.debug("Create combatant-authorization record")

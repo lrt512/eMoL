@@ -19,35 +19,38 @@
 
 import logging
 from uuid import uuid4
+from dirtyfields import DirtyFieldsMixin
 
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from cards.utility.date import DATE_FORMAT, add_years, today
 from cards.utility.named_tuples import NameSlugTuple
+from cards.mail import send_card_expiry, send_card_reminder
 
 from .authorization import Authorization
 from .discipline import Discipline
 from .marshal import Marshal
-from .reminder_email import ReminderEmail
+from .reminder import Reminder
+from .reminder_mixin import ReminderMixin, DirtyModelReminderMeta
 
 __all__ = ["Card"]
 
 logger = logging.getLogger("cards")
 
 
-class Card(models.Model):
+class Card(models.Model, DirtyFieldsMixin, ReminderMixin):
     """Model an authorization card
 
     Card date is the date that the card was renewed.
     The card_expiry property gives the expiry date
 
-    Discipline will be none if card date is global
-
     Attributes:
         id: Primary key in the database
         combatant_id: The combatant's id
         discipline_id: ID of the discipline this card is for
-        card_issued: Date this card was last renewed
+        date_issued: Date this card was last renewed
         authorizations: Authorizations attached to this card
             (Authorization model via CombatantAuthorization)
         warrants: Marshal warrants attached to this card
@@ -56,9 +59,6 @@ class Card(models.Model):
     Properties:
         expiration_date: The card's expiration date
         expiry_days: Number of days until expiry
-
-    Backrefs:
-        reminders: This card's expiry reminders
     """
 
     class Meta:
@@ -78,7 +78,7 @@ class Card(models.Model):
     warrants = models.ManyToManyField(Marshal, through="CombatantWarrant")
     uuid = models.UUIDField(default=uuid4)
 
-    card_issued = models.DateField()
+    date_issued = models.DateField()
 
     def __str__(self) -> str:
         return f"<Card: {self.combatant.sca_name}/{self.discipline.name}>"
@@ -90,10 +90,29 @@ class Card(models.Model):
         That is, the self.card + CARD_DURATION years
 
         Returns:
-            Date of the card's expiry date as a string
+            Card's expiry date as a datetime.date
 
         """
-        return add_years(self.card_issued, 2)
+        return add_years(self.date_issued, 2)
+
+    @property
+    def expiration_date_str(self):
+        """Return the expiration date as a string"""
+        return self.expiration_date.strftime(DATE_FORMAT)
+
+    def send_expiry(self, reminder):
+        if not isinstance(reminder.content_object, Card):
+            logger.error("Reminder %s is not a card", reminder)
+            return False
+
+        return send_card_expiry(reminder)
+
+    def send_reminder(self, reminder):
+        if not isinstance(reminder.content_object, Card):
+            logger.error("Reminder %s is not a card", reminder)
+            return False
+
+        return send_card_reminder(reminder)
 
     @property
     def expiry_or_expired(self):
@@ -113,22 +132,9 @@ class Card(models.Model):
         return (self.expiration_date - today()).days
 
     def renew(self, renew_date=None):
-        """Renew this card with a new card_date
-
-        Fix up the reminders associated with this card, too.
-        """
-        self.card_issued = renew_date or today()
+        """Renew this card with a new card_date"""
+        self.date_issued = renew_date or today()
         self.save()
-
-        # Remove all existing ReminderEmail objects
-        ReminderEmail.objects.filter(card=self).delete()
-
-        # Create reminders for the 60, 30, and 14 days before expiration
-        for days_before_expiry in [60, 30, 14]:
-            ReminderEmail.create_for_card(self, days_before_expiry)
-
-        # And create an expiry reminder
-        ReminderEmail.create_for_card(self, 0)
 
     def has_authorization(self, authorization):
         """Does this card have a given authorization?"""
@@ -200,38 +206,12 @@ class Card(models.Model):
             for w in self.warrants.order_by("marshal__name").all()
         ]
 
-    @classmethod
-    def create(
-        cls,
-        combatant,
-        discipline,
-        authorizations,
-        warrants,
-        card_issued=None,
-        create_date=None,
-    ):
-        """Create a new card object"""
 
-        card_issued = card_issued or today()
-        create_date = create_date or today()
-
-        card = cls(
-            combatant=combatant,
-            discipline=discipline,
-            card_issued=card_issued,
-            uuid=uuid4(),
-        )
-
-        card.save()
-
-        for a in authorizations:
-            auth = Authorization.find(discipline, a)
-            card.authorizations.add(auth)
-
-        for w in warrants:
-            marshal = Marshal.find(discipline, w)
-            card.warrants.add(marshal)
-
-        card.renew(create_date)
-
-        return card
+@receiver(post_save, sender=Card)
+def update_reminders(sender, instance, created, **kwargs):
+    """Manage reminders when the card date is updated"""
+    if created:
+        Reminder.create_or_update_reminders(instance)
+    else:
+        if "date_issued" in instance.get_dirty_fields(check_relationship=True):
+            Reminder.create_or_update_reminders(instance)

@@ -8,7 +8,7 @@ from .discipline import DisciplineAdmin  # noqa: F401
 from .marshal import MarshalAdmin  # noqa: F401
 from .permission import Permission  # noqa: F401
 from .privacy_acceptance import PrivacyAcceptanceAdmin  # noqa: F401
-from .reminder_email import ReminderEmailAdmin  # noqa: F401
+from .reminder import ReminderAdmin  # noqa: F401
 from .user_permission import UserPermission  # noqa: F401
 from .waiver import WaiverAdmin  # noqa: F401
 

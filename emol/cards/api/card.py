@@ -54,7 +54,7 @@ class CardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Card
-        fields = ["uuid", "discipline", "card_issued", "authorizations", "warrants"]
+        fields = ["uuid", "discipline", "date_issued", "authorizations", "warrants"]
 
 
 class CardViewSet(GenericViewSet):
@@ -85,7 +85,7 @@ class CardDateSerializer(serializers.Serializer):
 
     uuid = serializers.UUIDField()
     discipline_slug = serializers.CharField()
-    card_issued = serializers.DateField()
+    date_issued = serializers.DateField()
 
 
 class CardDateViewSet(GenericViewSet):
@@ -110,8 +110,8 @@ class CardDateViewSet(GenericViewSet):
             Card, combatant__uuid=uuid, discipline__slug=discipline_slug
         )
 
-        # Update card_issued field
-        card.card_issued = serializer.validated_data["card_issued"]
+        # Update date_issued field
+        card.date_issued = serializer.validated_data["date_issued"]
         card.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
