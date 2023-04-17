@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 from django.conf.urls.static import static
 
 from cards.api.urls import urlpatterns as api_urlpatterns
-from cards.views import combatant, home, privacy
+from cards.views import combatant, home, privacy, admin
 
 site.site_header = "Ealdormere eMoL"
 site.site_title = "eMoL Admin"
@@ -25,6 +25,7 @@ urlpatterns = [
     ),
     path("privacy-policy", privacy.privacy_policy, name="privacy-policy"),
     path("privacy-policy/<str:code>", privacy.privacy_policy, name="privacy-policy"),
+    path("get_valid_objects/", admin.get_valid_objects, name="get_valid_objects"),
     path("api/", include(api_urlpatterns)),
 ]
 
