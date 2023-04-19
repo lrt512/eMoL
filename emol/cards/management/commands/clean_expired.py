@@ -12,7 +12,7 @@ logger = logging.getLogger("cards")
 
 
 class Command(BaseCommand):
-    help = "Send reminders for expiring Cards and Waivers."
+    help = "Clean up expired update codes."
 
     def handle(self, *args, **options):
         now = timezone.now().astimezone(pytz.utc)

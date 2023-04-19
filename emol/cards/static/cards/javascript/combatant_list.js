@@ -70,6 +70,7 @@
                     populate(data, null);
                     $("#edit-combatant-form").validate({ ignore: "" });
                     $("#combatant-title").text(data.sca_name || data.legal_name);
+                    $(".datepicker").datepicker({ format: "yyyy-mm-dd", autoclose: true });
                     $combatant_detail.modal("show");
                     fetch_combatant_cards();
                     fetch_waiver_date();
