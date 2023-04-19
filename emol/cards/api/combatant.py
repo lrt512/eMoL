@@ -5,7 +5,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from cards.models.combatant import Combatant
+from cards.models import Combatant
 
 from .permissions import CombatantInfoPermission
 

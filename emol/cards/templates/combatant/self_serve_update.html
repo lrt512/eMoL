@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+<div class="row top-space-xl">
+  <div class="col-md-2"></div>
+  <div class="col-md-8">
+    <h1>Update Info</h1>
+  </div>
+</div>
+<div class="row top-space-md">
+  <form method="post" action="/self-serve-update/{{ code }}">
+    {% csrf_token %}
+    <div class="col-md-12">
+      {% include 'combatant/combatant_info.html' %}
+    </div>
+    {% if message %}
+    <div class="row top-space-md">
+      <div class="col-md-12">
+        {{ message }}
+      </div>
+    </div>
+    {% endif %}
+    {% if errors %}
+    <div class="row top-space-md">
+      <ul>
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    <div class="row top-space-xl right">
+      <div class="col-md-6">
+        <span class="modal-footer-error" id="validation-error-notice">Fix validation errors before saving</span>
+        <input type="button" class="btn btn-close" value="Cancel" />
+        <input type="submit" class="btn btn-primary btn-save" value="Save" />
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

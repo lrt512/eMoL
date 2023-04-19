@@ -93,7 +93,7 @@ def send_waiver_expiry(reminder):
         return False
 
 
-def send_info_update(combatant, update_request):
+def send_info_update(combatant, update_code):
     """Send a information update link to a combatant.
 
     Args:
@@ -102,7 +102,7 @@ def send_info_update(combatant, update_request):
 
     """
     template = EMAIL_TEMPLATES.get("info_update")
-    body = template.get("body").format(update_url=update_request.change_info_url)
+    body = template.get("body").format(update_url=update_code.url)
     return Emailer.send_email(combatant.email, template.get("subject"), body)
 
 

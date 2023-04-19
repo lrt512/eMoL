@@ -6,12 +6,14 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from cards.api.permissions import CombatantAuthorizationPermission
-from cards.models.authorization import Authorization
-from cards.models.card import Card
-from cards.models.combatant import Combatant
-from cards.models.combatant_authorization import CombatantAuthorization
-from cards.models.discipline import Discipline
-from cards.utility.date import today
+from cards.models import (
+    Authorization,
+    Card,
+    Combatant,
+    CombatantAuthorization,
+    Discipline,
+)
+from cards.utility.time import today
 
 logger = logging.getLogger("cards")
 

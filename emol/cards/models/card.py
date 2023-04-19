@@ -19,21 +19,21 @@
 
 import logging
 from uuid import uuid4
-from dirtyfields import DirtyFieldsMixin
 
+from dirtyfields import DirtyFieldsMixin
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from cards.utility.date import DATE_FORMAT, add_years, today
-from cards.utility.named_tuples import NameSlugTuple
 from cards.mail import send_card_expiry, send_card_reminder
+from cards.utility.named_tuples import NameSlugTuple
+from cards.utility.time import DATE_FORMAT, add_years, today
 
 from .authorization import Authorization
 from .discipline import Discipline
 from .marshal import Marshal
 from .reminder import Reminder
-from .reminder_mixin import ReminderMixin, DirtyModelReminderMeta
+from .reminder_mixin import DirtyModelReminderMeta, ReminderMixin
 
 __all__ = ["Card"]
 

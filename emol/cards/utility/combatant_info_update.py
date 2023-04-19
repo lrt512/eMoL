@@ -1,6 +1,5 @@
-from models.combatant_update import CombatantUpdate, InvalidCode
-
 from cards.models.permission import PermissionDenied
+from cards.models.update_code import InvalidCode, UpdateCode
 
 
 def update_info(combatant, data, code=None):
@@ -18,10 +17,10 @@ def update_info(combatant, data, code=None):
     if code:
         # Check if the code is valid and has not been used
         try:
-            combatant_update = CombatantUpdate.objects.get(
+            combatant_update = UpdateCode.objects.get(
                 combatant=combatant, code=code, used=False
             )
-        except CombatantUpdate.DoesNotExist:
+        except UpdateCode.DoesNotExist:
             raise InvalidCode("The code provided is invalid or has already been used")
 
         # Mark the code as used

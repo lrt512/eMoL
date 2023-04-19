@@ -1,7 +1,7 @@
 """Middleware to implement a global throttle for anonymous users"""
 from django.conf import settings
-from django.shortcuts import render
 from django.core.cache import cache
+from django.shortcuts import render
 
 
 class GlobalThrottleMiddleware:

@@ -10,6 +10,7 @@ from .permission import Permission  # noqa: F401
 from .privacy import PrivacyAcceptanceAdmin  # noqa: F401
 from .privacy import PrivacyPolicyAdmin  # noqa: F401
 from .reminder import ReminderAdmin  # noqa: F401
+from .update_code import UpdateCodeAdmin  # noqa: F401
 from .user_permission import UserPermission  # noqa: F401
 from .waiver import WaiverAdmin  # noqa: F401
 

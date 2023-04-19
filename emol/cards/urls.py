@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib.admin import site
 from django.urls import include, path
 from django.views.generic import TemplateView
-from django.conf.urls.static import static
 
 from cards.api.urls import urlpatterns as api_urlpatterns
-from cards.views import combatant, home, privacy, admin
+from cards.views import combatant, home, privacy, self_serve_update
 
 site.site_header = "Ealdormere eMoL"
 site.site_title = "eMoL Admin"
@@ -16,6 +16,11 @@ urlpatterns = [
     path("", home.index, name="index"),
     path("request-card", home.request_card, name="request-card"),
     path("update-info", home.update_info, name="update-info"),
+    path(
+        "self-serve-update/<str:code>",
+        self_serve_update.self_serve_update,
+        name="self-serve-update",
+    ),
     path("combatants", combatant.combatant_list, name="combatant-list"),
     path("card/<str:card_id>", combatant.combatant_card, name="combatant-card"),
     path(
@@ -25,7 +30,6 @@ urlpatterns = [
     ),
     path("privacy-policy", privacy.privacy_policy, name="privacy-policy"),
     path("privacy-policy/<str:code>", privacy.privacy_policy, name="privacy-policy"),
-    path("get_valid_objects/", admin.get_valid_objects, name="get_valid_objects"),
     path("api/", include(api_urlpatterns)),
 ]
 

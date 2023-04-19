@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
-from django.forms import ModelForm, ModelChoiceField
+from django.forms import ModelChoiceField, ModelForm
+
 from cards.models.card import Card
-from cards.models.waiver import Waiver
 from cards.models.reminder import Reminder
+from cards.models.waiver import Waiver
 
 
 class ReminderForm(ModelForm):
@@ -13,7 +14,8 @@ class ReminderForm(ModelForm):
         queryset=ContentType.objects.filter(model__in=("Card", "Waiver")).order_by(
             "model"
         ),
-        empty_label="-- Select --", label="Reminder for"
+        empty_label="-- Select --",
+        label="Reminder for",
     )
     object_id = ModelChoiceField(
         queryset=Card.objects.none(), empty_label="-- Select --", label="Object"
@@ -21,8 +23,8 @@ class ReminderForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['content_type'].label_from_instance = self._get_label_from_instance
-        
+        self.fields["content_type"].label_from_instance = self._get_label_from_instance
+
         if self.instance and self.instance.object_id is not None:
             self.fields["content_type"].disabled = True
             self.fields["object_id"].disabled = True
@@ -33,7 +35,7 @@ class ReminderForm(ModelForm):
     def _get_label_from_instance(self, obj):
         """Get display text for content_type choices"""
         return obj.name.capitalize()
-        
+
     def _get_object_instance_queryset(self, content_type=None, object_id=None):
         """Get queryset for object_id field based on selected content_type"""
         if content_type and object_id:
@@ -65,5 +67,6 @@ class ReminderForm(ModelForm):
 
 class ReminderAdmin(admin.ModelAdmin):
     """Django Admin for Reminder model"""
+
 
 admin.site.register(Reminder, ReminderAdmin)

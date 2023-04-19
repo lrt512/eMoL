@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Time and date utility functions."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -34,17 +34,15 @@ def string_to_date(date_str):
     return date_time.date()
 
 
-def add_years(start_date, years, days=None):
+def add_years(start_date, years):
     """Return a date in the future.
 
     Args:
         start_date: The date to change
         years: number of years to add
-        days: optional number of days to add
 
     Returns:
         The adjusted date
-
     """
     if start_date is None:
         return None
@@ -52,8 +50,8 @@ def add_years(start_date, years, days=None):
     if isinstance(start_date, str):
         start_date = datetime.strptime(start_date, DATE_FORMAT)
 
-    delta = relativedelta(years=years)
-    if days is not None:
-        delta += relativedelta(days=days)
+    return start_date + relativedelta(years=years)
 
-    return start_date + delta
+
+def utc_tomorrow():
+    return datetime.utcnow() + timedelta(days=1)

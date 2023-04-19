@@ -11,7 +11,7 @@ from cards.models.combatant import Combatant
 from cards.models.combatant_warrant import CombatantWarrant
 from cards.models.discipline import Discipline
 from cards.models.marshal import Marshal
-from cards.utility.date import today
+from cards.utility.time import today
 
 
 class CombatantWarrantSerializer(serializers.ModelSerializer):

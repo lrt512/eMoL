@@ -4,9 +4,7 @@ import logging
 
 from django.shortcuts import redirect, render
 
-from cards.models.authorization import Authorization
-from cards.models.combatant import Combatant
-from cards.models.discipline import Discipline
+from cards.models import Authorization, Combatant, Discipline, UpdateCode
 from cards.utility.decorators import permission_required
 from current_user import get_current_user
 
@@ -36,42 +34,6 @@ def combatant_detail(request):
         "authorizations": Authorization.objects.all(),
     }
     return render(request, "combatant/combatant_detail.html", context)
-
-
-'''
-def combatant_stats(request):
-    """Display the combatant statistics page."""
-    results = {}
-
-    for disc in Discipline.query.all():
-        disc_results = []
-
-        # Count the numbers for each authorization
-        for auth in disc.authorizations:
-            disc_results.append(
-                {
-                    "name": auth.name,
-                    "count": CombatantAuthorization.query.filter(
-                        CombatantAuthorization.authorization_id == auth.id
-                    ).count(),
-                }
-            )
-
-        # Count the numbers for each marshal type
-        for marshal in disc.marshals:
-            disc_results.append(
-                {
-                    "name": marshal.name,
-                    "count": Warrant.query.filter(
-                        Warrant.marshal_id == marshal.id
-                    ).count(),
-                }
-            )
-
-        results[disc.name] = disc_results
-
-    return render(request, "combatant/combatant_stats.html", results=results)
-'''
 
 
 def combatant_card(request, card_id):

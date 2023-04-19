@@ -1,11 +1,11 @@
-from datetime import date
 import logging
+from datetime import date
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from cards.models.reminder import Reminder
-from cards.utility.date import DATE_FORMAT
+from cards.utility.time import DATE_FORMAT
 
 logger = logging.getLogger("cards")
 

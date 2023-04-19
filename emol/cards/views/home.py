@@ -5,9 +5,9 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
 from cards.mail import send_card_url, send_info_update, send_privacy_policy
-from cards.models.combatant import Combatant
-from current_user import get_current_user
+from cards.models import Combatant, UpdateCode
 from cards.utility.throttle import throttle
+from current_user import get_current_user
 
 logger = logging.getLogger("cards")
 
@@ -33,7 +33,6 @@ def request_card(request):
 
         try:
             combatant = Combatant.objects.get(email=email)
-            print(combatant)
             if combatant.accepted_privacy_policy:
                 send_card_url(combatant)
             else:
@@ -52,15 +51,20 @@ def update_info(request):
     if request.method == "GET":
         return render(request, "home/update_info.html")
     elif request.method == "POST":
-        email = request.form["update-info-email"]
+        email = request.POST.get("update-info-email", None)
         try:
             context = {}
-            combatant = Combatant.get_by_email(email)
-            # update_request = UpdateRequest(combatant=combatant)
-            # update_request.save()
+            combatant = Combatant.objects.get(email=email)
+            if combatant.accepted_privacy_policy:
+                code, created = UpdateCode.objects.get_or_create(combatant=combatant)
+                if created:
+                    logger.info(f"Created update code for {combatant}")
+                    code.save()
+                send_info_update(combatant, code)
+            else:
+                logger.error(f"Card request for {combatant} (privacy not accepted)")
+                send_privacy_policy(combatant.privacy_acceptance)
 
-            # Mail it
-            # send_info_update(combatant, update_request)
             context["message"] = (
                 "If a combatant with this email exists, "
                 "an email has been sent with instructions for "

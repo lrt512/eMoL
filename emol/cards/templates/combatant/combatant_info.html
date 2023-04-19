@@ -21,10 +21,13 @@
     <div class="form-group row">
         <label for="edit-combatant-email" class="col-md-4 col-form-label">Email</label>
         <div class="col-md-8">
-                <!-- Disable if self serve -->
+                {% if self_serve %}
+                <span>{% firstof combatant.email '' %}</span>
+                {% else %}
                 <input type="text" id="edit-combatant-email" name="email" class="form-control"
                    value="{% firstof combatant.email '' %}" required
                    {% if not write_combatant_info %}disabled{% endif %} />
+                {% endif %}
             <input type="hidden" id="edit-combatant-original_email"
                    name="original_email"
                    value="{{ firstof combatant.email '' %}"/>
@@ -81,30 +84,17 @@
         <label for="edit-combatant-member-number" class="col-md-4 col-form-label">SCA Member</label>
         <div class="col-md-8">
                 <input type="number" id="edit-combatant-member-number" name="member_number" class="form-control"
-                   value="{% firstof combatant.member_number or '' '' %}"
+                   value="{% firstof combatant.member_number or '' %}"
                    {% if not write_combatant_info %}disabled{% endif %} />
         </div>
     </div>
     <div class="form-group row">
         <label for="edit-combatant-member-expiry" class="col-md-4 col-form-label">Expiry</label>
         <div class="col-md-5">
-                <input type="text" id="edit-combatant-member-expiry" name="member_expiry" class="form-control"
-                   value="{% firstof combatant.member_expiry or '' '' %}"
+                <input type="text" id="edit-combatant-member-expiry" name="member_expiry" class="form-control datepicker"
+                   value="{% firstof combatant.member_expiry|date:'Y-m-d' or '' %}"
                    readonly {% if not write_combatant_info %}disabled{% endif %}/>
         </div>
     </div>
 </div>
 
-{% if write_combatant_info %}
-<script type="text/javascript">
-    (function($)
-    {
-        "use strict";
-
-        $(document).ready(function()
-        {
-            $("#edit-combatant-member-expiry").datepicker({format: "yyyy-mm-dd", autoclose: true});
-        })
-    })(jQuery);
-</script>
-{% endif %}
