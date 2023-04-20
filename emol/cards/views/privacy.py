@@ -1,7 +1,7 @@
 import logging
 
 from django.http import HttpResponseBadRequest
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_http_methods
 
 from cards.models.combatant import Combatant
@@ -18,11 +18,10 @@ def privacy_policy(request, code=None):
     args:
         uuid - UUID for a PrivacyAcceptance instance
     """
+    combatant = None
     code = request.POST.get("code", code)
-    try:
-        combatant = Combatant.objects.get(privacy_acceptance_code=code)
-    except Combatant.DoesNotExist:
-        combatant = None
+    if code is not None:    
+        combatant = get_object_or_404(Combatant,privacy_acceptance_code=code)
 
     context = {"policy": PrivacyPolicy.latest_text()}
     if request.method == "POST":
