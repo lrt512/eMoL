@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
@@ -5,6 +6,7 @@ from rest_framework.serializers import ModelSerializer
 
 from cards.models import Combatant, UpdateCode
 
+logger = logging.getLogger("cards")
 
 class SelfServeUpdateSerializer(ModelSerializer):
     """Like a CombatantSerializer, but can't update email address"""
@@ -89,5 +91,7 @@ def self_serve_update(request, code):
             return render(request, "combatant/self_serve_update.html", context)
 
         serializer.save()
+        logger.info("Consumed self-serve update code %s", code)
+        update_code.delete()
         context = {"message": "Your information has been updated."}
         return render(request, "message/message.html", context)
