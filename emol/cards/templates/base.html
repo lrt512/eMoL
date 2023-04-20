@@ -3,27 +3,49 @@
 {% load static %}
 
 <html>
+
 <head>
   <title>{% block title %}eMoL{% endblock %}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!--
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!--
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'cards/favicon/apple-touch-icon.png' %}">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'cards/favicon/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'cards/favicon/favicon-16x16.png' %}">
     <link rel="icon" type="image/png" sizes="192x192" href="{% static 'cards/favicon/android-chrome-192x192.png' %}">
     <link rel="icon" type="image/png" sizes="512x512" href="{% static 'cards/favicon/android-chrome-512x512.png' %}">
     <link rel="manifest" href="{% static 'cards/favicon/site.webmanifest' %}">
-    --> 
-    {% include 'includes/global.html' %}
-    {% block head %}{% endblock %}
+    -->
+  {% include 'includes/global.html' %}
+  {% block head %}{% endblock %}
 </head>
+
 <body>
-    <div>
-       {% include 'topnav.html' %}
-        <div class="container">
-            {% block body %} {% endblock %}
-        </div>
+  <header>
+    {% include 'topnav.html' %}
+  </header>
+
+  <div class="content-wrapper">
+    <div class="container">
+      {% block body %} {% endblock %}
     </div>
+  </div>
+
+  <footer class="footer">
+    <nav class="navbar">
+      <div class="container-fluid top-border">
+        <div class="text-muted col-sm-4">
+          Copyright &copy; 2023<br>
+          Kingdom of Ealdormere
+        </div>
+        <div class="col-sm-6"></div>
+        <div class="text-muted right col-sm-2">
+          <a href="/privacy-policy">Privacy</a>
+        </div>
+      </div>
+    </nav>
+  </footer>
 </body>
+
 </html>
 {% endautoescape %}
