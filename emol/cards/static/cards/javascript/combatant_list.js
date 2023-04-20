@@ -74,6 +74,7 @@
                     $combatant_detail.modal("show");
                     fetch_combatant_cards();
                     fetch_waiver_date();
+                    form_loaded();
                     save_button();
                 },
                 error: function (jqXHR, status, error) {
