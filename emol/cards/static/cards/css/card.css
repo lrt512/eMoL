@@ -22,6 +22,10 @@ body {
     height: 18px;
 }
 
+.row.logo {
+    height: 32px;
+}
+
 .col5 {
     width: 5%;
     line-height: 16px;
