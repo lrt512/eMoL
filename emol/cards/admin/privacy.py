@@ -4,8 +4,7 @@ from django.contrib import admin, messages
 from django.db import models
 from django.forms import ValidationError
 
-from cards.models.privacy_acceptance import PrivacyAcceptance
-from cards.models.privacy_policy import PrivacyPolicy
+from cards.models import PrivacyAcceptance, PrivacyPolicy
 
 __all__ = ["PrivacyAcceptanceAdmin"]
 

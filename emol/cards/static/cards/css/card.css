@@ -1,0 +1,135 @@
+body {
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 14px;
+}
+
+.card {
+    width: 480px;
+    border: 1px solid black;
+    padding: 5px;
+}
+
+.title {
+    line-height: 24px;
+    height: 24px;
+    font-weight: bold;
+    padding-top: 2px;
+    font-size: 20px;
+}
+
+.row {
+    width: 100%;
+    height: 18px;
+}
+
+.col5 {
+    width: 5%;
+    line-height: 16px;
+    height: 18px;
+    float: left;
+}
+
+.col10 {
+    width: 10%;
+    line-height: 16px;
+    height: 18px;
+    float: left;
+}
+
+.col20 {
+    width: 20%;
+    line-height: 16px;
+    height: 18px;
+    float: left;
+}
+
+.col25 {
+    width: 25%;
+    line-height: 16px;
+    height: 18px;
+    float: left;
+}
+
+.col30 {
+    width: 30%;
+    line-height: 16px;
+    height: 18px;
+    float: left;
+}
+
+.col40 {
+    width: 30%;
+    line-height: 16px;
+    height: 18px;
+    float: left;
+}
+
+.col50 {
+    width: 50%;
+    line-height: 16px;
+    height: 18px;
+    float: left;
+}
+
+.col60 {
+    width: 60%;
+    line-height: 16px;
+    height: 18px;
+    float: left;
+}
+
+.col100 {
+    width: 100%;
+}
+
+.center {
+    text-align: center
+}
+
+.space-top-3 {
+    margin-top: 3px;
+}
+
+.space-bottom-3 {
+    margin-bottom: 3px;
+}
+
+.space-top-5 {
+    margin-top: 5px;
+}
+
+.space-top-neg {
+    margin-top: -13px;
+}
+
+.green {
+    color: #008000;
+}
+
+.red {
+    color: #9C1A1C;
+}
+
+.discipline {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+@media print {
+    body {
+        transform: scale(0.8);
+    }
+}
+
+#card {
+    position: relative;
+}
+
+.watermark {
+    opacity: 0.15;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 75%;
+}
