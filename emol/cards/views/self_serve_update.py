@@ -8,6 +8,7 @@ from cards.models import Combatant, UpdateCode
 
 logger = logging.getLogger("cards")
 
+
 class SelfServeUpdateSerializer(ModelSerializer):
     """Like a CombatantSerializer, but can't update email address"""
 

@@ -20,8 +20,8 @@ def privacy_policy(request, code=None):
     """
     combatant = None
     code = request.POST.get("code", code)
-    if code is not None:    
-        combatant = get_object_or_404(Combatant,privacy_acceptance_code=code)
+    if code is not None:
+        combatant = get_object_or_404(Combatant, privacy_acceptance_code=code)
 
     context = {"policy": PrivacyPolicy.latest_text()}
     if request.method == "POST":

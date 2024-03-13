@@ -20,10 +20,12 @@ class UpdateCode(models.Model):
     def __str__(self):
         email = self.combatant.email
         code_str = str(self.code)[:4] + "..." + str(self.code)[-4:]
-        expires_at_str = self.expires_at.astimezone(timezone.get_current_timezone()).strftime("%Y-%m-%d %H:%M")
-    
+        expires_at_str = self.expires_at.astimezone(
+            timezone.get_current_timezone()
+        ).strftime("%Y-%m-%d %H:%M")
+
         return f"<UpdateCode: {email} ({code_str}) {expires_at_str}>"
-    
+
     def is_valid(self):
         return datetime.utcnow() < self.expires_at
 
