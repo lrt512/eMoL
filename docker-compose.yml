@@ -1,9 +1,22 @@
-version: '3'
+# This is only used for development.
+# In production we will load the container from the Dockerfile directly
+version: '3.8'
 
 services:
-  web:
+  emol:
     build: .
     ports:
-      - "8000:80"
+      - "8000:80"  # You'll hit localhost:8000 in your browser.
     volumes:
-      - ./emol:/app
+      # Mount the current directory into /app in the container for live code
+      - ./emol:/app  
+      # Persistent volume for PostgreSQL.
+      # !!! If the PostgreSQL major version changes, this mount point needs to update with it.
+      - postgres_data:/var/lib/postgresql/15/main  
+    environment:
+      DJANGO_SECRET_KEY: xyz789  # Test values for dev
+      POSTGRES_PASSWORD: abc123  
+
+volumes:
+  postgres_data:  
+

@@ -1,26 +1,52 @@
-FROM ubuntu:22.04
+# Build stage
+# Temporary so we can build non-wheel packages in the venv
+# This prevents needing buld-essential in the deployed container.
+FROM python:3.12-slim as builder
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential libpq-dev
 
-WORKDIR /app
-COPY emol/ /app/
+# Set up virtual environment
+RUN python3 -m venv /venv
+ENV PATH="/venv/bin:$PATH"
 
+# Install Python dependencies
+COPY requirements/prod.txt /tmp/requirements.txt
+RUN pip install --upgrade pip && \
+    pip install wheel && \
+    pip install -r /tmp/requirements.txt
+
+# /Build stage
+
+# Application stage
+# This is the container we will deploy in Lightsail
+FROM python:3.12-slim
+COPY --from=builder /venv /venv
+ENV PATH="/venv/bin:$PATH"
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN apt-get update && apt-get install -y nginx \
-    mysql-server libmysqlclient-dev redis-server \
-    build-essential python3 python3-dev python3-venv python3-pip
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql postgresql-client \
+    nginx certbot python3-certbot-nginx \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY requirements/ /tmp/requirements/
+# Set up application directory
+WORKDIR /app
+COPY emol/ /app/
 
-RUN python3 -m venv /venv
-ENV PATH="/venv/bin:$PATH"
-RUN /venv/bin/pip install --upgrade pip
-RUN /venv/bin/pip install wheel
-RUN /venv/bin/pip install -r /tmp/requirements/dev.txt
-
+# Configure Nginx
 RUN rm /etc/nginx/sites-enabled/default
 COPY docker_files/nginx.conf /etc/nginx/sites-enabled/
 
+# Expose port for Nginx
 EXPOSE 80
 
-CMD service nginx start && gunicorn --bind 0.0.0.0:8000 myproject.wsgi
+# Copy and set entrypoint script
+COPY docker_files/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
+# /Application stage
