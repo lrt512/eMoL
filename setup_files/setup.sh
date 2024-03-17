@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ "$1" = "dev" ]; then
+    is_dev=true
+else
+    is_dev=false
+fi
+
 apt-get update
 apt-get install -y \
     nginx certbot \
@@ -26,13 +32,15 @@ pip install -r /opt/emol/requirements/prod.txt
 chown -R www-data:www-data /opt/venv
 
 rm /etc/nginx/sites-enabled/default
-cp /docker_files/nginx.conf /etc/nginx/sites-enabled/
+cp /opt/emol/setup_files/nginx.conf /etc/nginx/sites-enabled/
 
-# apt-get purge --auto-remove -y build-essential
+apt-get purge --auto-remove -y build-essential
 # apt-get clean
 # rm -rf /var/lib/apt/lists/*
 
-cd /app
+# if is_dev then copy /opt/emol/emol/emol/de
+
+cd /opt/emol/emol
 echo "Apply migrations"
 /opt/venv/bin/python manage.py migrate
 
@@ -41,3 +49,6 @@ echo "Collect static files"
 
 echo "Create cache table if needed"
 /opt/venv/bin/python manage.py createcachetable
+
+service nginx start
+service emol start

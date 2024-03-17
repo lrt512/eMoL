@@ -1,4 +1,3 @@
-"""Base settings for production deployment"""
 import os
 from pathlib import Path
 
@@ -6,15 +5,15 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 BASE_URL = "http://localhost:8000"
+SECRET_KEY = 'super-secret-development-key-1234'
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-
-DEBUG = False
-NO_ENFORCE_PERMISSIONS = False
+# These should not be True in production!
+DEBUG = True
+NO_ENFORCE_PERMISSIONS = True
 
 ALLOWED_HOSTS = ["localhost"]
 
-SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_SECONDS = 31536000 
 
 INSTALLED_APPS = [
     "sso_user",  # needs to be before contrib.admin
@@ -35,9 +34,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "global_throttle.middleware.GlobalThrottleMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "csp.middleware.CSPMiddleware",
+    'csp.middleware.CSPMiddleware',    
     "django.middleware.security.SecurityMiddleware",
-    "django_permissions_policy.PermissionsPolicyMiddleware",
+    "django_permissions_policy.PermissionsPolicyMiddleware",    
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -47,7 +46,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "emol.urls"
 STATIC_URL = "static/"
-STATIC_ROOT = "/app/static/"
+STATIC_ROOT = "/opt/emol/static/"
 
 TEMPLATES = [
     {
@@ -76,7 +75,10 @@ LOGGING = {
             "formatter": "app",
         },
     },
-    "root": {"level": "DEBUG", "handlers": ["console"]},
+    "root": {
+        "level": "DEBUG",
+        "handlers": ["console"]
+    },
     "loggers": {
         "": {
             "handlers": ["console"],
@@ -87,7 +89,8 @@ LOGGING = {
     "formatters": {
         "app": {
             "format": (
-                "%(asctime)s [%(levelname)-8s] " "(%(module)s.%(funcName)s) %(message)s"
+                u"%(asctime)s [%(levelname)-8s] "
+                "(%(module)s.%(funcName)s) %(message)s"
             ),
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
@@ -95,25 +98,24 @@ LOGGING = {
 }
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "emol",
-        "USER": "emol_db_user",
-        "PASSWORD": os.getenv("EMOL_DB_PASSWORD"),
-        "HOST": "localhost",
-        "PORT": "3306",
-        "OPTIONS": {
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-            "charset": "utf8mb4",
-        },
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': '/mnt/data/emol.db',
+    },
+    'cache_db': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': '/mnt/data/emol_cache.db',
     }
 }
 
 CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "emol_cache",
-    }
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'emol_cache',
+        'OPTIONS': {
+            'DATABASE': 'cache_db',
+        },
+    },
 }
 
 CACHE_TTL = 60 * 15  # 15 minutes
@@ -132,8 +134,8 @@ AUTHENTICATION_BACKENDS = [
 AUTH_USER_MODEL = "sso_user.SSOUser"
 AUTHLIB_OAUTH_CLIENTS = {
     "google": {
-        "client_id": "!!! REPLACE WITH YOUR GOOGLE OAUTH CLIENT ID !!!",
-        "client_secret": "!!! REPLACE WITH YOUR GOOGLE OAUTH CLIENT SECRET !!!",
+        "client_id": "362727061191-2aehro91hh3hkvqv4ro1oll8j0i63ujb.apps.googleusercontent.com",
+        "client_secret": "egAGDcIPcKwz7v3P6ZYF42Z0",
     }
 }
 
@@ -199,6 +201,7 @@ CSP_SCRIPT_SRC = (
     "'self'",
     "https://cdnjs.cloudflare.com",
     "https://maxcdn.bootstrapcdn.com",
-    "https://cdn.datatables.net",
-    "sha256-PhCsD9cDmNHcYlaLal8yHa4TGyayjyPy1/u4cyvSojQ=",
+    "https://cdn.datatables.net", 
+    'sha256-PhCsD9cDmNHcYlaLal8yHa4TGyayjyPy1/u4cyvSojQ=',
+    
 )
