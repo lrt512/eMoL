@@ -12,16 +12,19 @@
 GUNICORN=/opt/venv/bin/gunicorn
 ROOT=/opt/emol
 PID=/var/run/emol.pid
+ENV_FILE=$ROOT/.env_dev
 
 case "$1" in
   start)
     echo "Starting eMoL"
     cd $ROOT
+    . $ENV_FILE
     $GUNICORN \
         --pid $PID \
         --workers 3 \
         --bind unix:/opt/emol/emol.sock \
         --access-logfile - \
+        --daemon \
         emol.wsgi:application
     ;;
   stop)

@@ -22,7 +22,7 @@ TIME_ZONE = "America/Toronto"
 # Address that emails are sent from. This is what will show up in the
 # "From" field of the email. This should be an email address that is
 # configured to send email from your server. If you are using a service
-# like AWS SES, then this should be an email address that is verified
+# like AWS SES, then this must be an email address that is verified
 # in SES.
 MAIL_DEFAULT_SENDER = "emol@kingdom.org"
 

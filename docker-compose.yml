@@ -1,7 +1,5 @@
 # !!! This is only used for development.
-# In production we will load the container from the Dockerfile directly
 version: '3.8'
-
 services:
   app:
     build: .
@@ -11,9 +9,26 @@ services:
       - DJANGO_SECRET_KEY=super_secret_key
       - DJANGO_SETTINGS_MODULE=emol.settings.dev_settings
       - EMOL_DEV=1
+      - DB_HOST=db
+      - DB_NAME=emol
+      - DB_USER=emol_db_user
+      - DB_PASSWORD=emol_db_password
     volumes:
       - .:/mnt/emol
       - data:/mnt/data
+    depends_on:
+      - db
+
+  db:
+    image: mysql:latest
+    environment:
+      - MYSQL_DATABASE=emol
+      - MYSQL_USER=emol_db_user
+      - MYSQL_PASSWORD=emol_db_password
+      - MYSQL_ROOT_PASSWORD=root_password
+    volumes:
+      - mysql_data:/var/lib/mysql
 
 volumes:
   data:
+  mysql_data:

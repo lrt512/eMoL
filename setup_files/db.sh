@@ -14,3 +14,6 @@ echo "Collect static files"
 
 echo "Create cache table if needed"
 /opt/venv/bin/python manage.py createcachetable
+
+echo "Create superuser if needed"
+/opt/venv/bin/python manage.py ensure_superuser
