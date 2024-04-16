@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {% autoescape on %}
 {% load static %}
+{% load settings_tags %}
 
 <html>
 
@@ -34,12 +35,14 @@
   <footer class="footer">
     <nav class="navbar">
       <div class="container-fluid top-border">
-        <div class="text-muted col-sm-4">
+        <div class="text-muted col-sm-3">
           Copyright &copy; 2023<br>
           Kingdom of Ealdormere
         </div>
-        <div class="col-sm-6"></div>
-        <div class="text-muted right col-sm-2">
+        <div class="content-centered col-sm-6">
+          {% settings_notice %}
+        </div>
+        <div class="text-muted right col-sm-3">
           <a href="/privacy-policy">Privacy</a>
         </div>
       </div>

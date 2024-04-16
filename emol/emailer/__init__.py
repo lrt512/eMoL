@@ -9,8 +9,8 @@ from django.conf import settings
 logger = logging.getLogger("cards")
 
 
-class Emailer:
-    """A simple emailing facility
+class AWSEmailer:
+    """A simple emailing facility that uses AWS SES
 
     SES configuration in settings.py:
         AWS_REGION = your AWS region
@@ -22,7 +22,7 @@ class Emailer:
 
     @classmethod
     def send_email(cls, recipient, subject, body):
-        """Send an email.
+        """Send an email
 
         Args:
             recipient: Recipient's email address

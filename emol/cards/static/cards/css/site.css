@@ -69,6 +69,14 @@ footer.footer {
     color: #008000;
 }
 
+.warning {
+    color: white;
+    background-color: #bf470b;
+    font-weight: bold;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
 .nav-pills>li.active>a {
     background-color: #942824;
 }

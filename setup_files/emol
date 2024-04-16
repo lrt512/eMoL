@@ -1,0 +1,41 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          gunicorn
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start Gunicorn at boot
+# Description:       Enable Gunicorn service.
+### END INIT INFO
+
+GUNICORN=/opt/venv/bin/gunicorn
+ROOT=/opt/emol
+PID=/var/run/emol.pid
+
+case "$1" in
+  start)
+    echo "Starting eMoL"
+    cd $ROOT
+    $GUNICORN \
+        --pid $PID \
+        --workers 3 \
+        --bind unix:/opt/emol/emol.sock \
+        --access-logfile - \
+        emol.wsgi:application
+    ;;
+  stop)
+    echo "Stopping Gunicorn"
+    kill -9 $(cat $PID)
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: /etc/init.d/gunicorn {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0

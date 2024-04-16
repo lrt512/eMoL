@@ -2,17 +2,112 @@
 import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# -------------------------------------------------------------------------------------
+# !!! Configure these settings for your deployment
 
-BASE_URL = "http://localhost:8000"
+# This is the base URL for your site. It is whatever you have configured
+# in your web server to point to the Django application. For example, if
+# you have configured your web server to point to the Django application
+# at http://yourdomain.com, then this should be "http://yourdomain.com".
+# If it's at http://yourdomain.com/emol, then this should be
+# "http://yourdomain.com/emol".
+# If it's a subdomain like http://emol.yourdomain.com, then this should be
+# "http://emol.yourdomain.com".
+BASE_URL = "http://yourdomain.com"
+
+# Timezone identifier for your locale
+# See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+TIME_ZONE = "America/Toronto"
+
+# Address that emails are sent from. This is what will show up in the
+# "From" field of the email. This should be an email address that is
+# configured to send email from your server. If you are using a service
+# like AWS SES, then this should be an email address that is verified
+# in SES.
+MAIL_DEFAULT_SENDER = "emol@kingdom.org"
+
+# Email address for your kingdom MOL
+MOL_EMAIL = "mol@kingdom.org"
+
+# Configure Google authentication
+AUTHLIB_OAUTH_CLIENTS = {
+    "google": {
+        "client_id": "!!! REPLACE WITH YOUR GOOGLE OAUTH CLIENT ID !!!",
+        "client_secret": "!!! REPLACE WITH YOUR GOOGLE OAUTH CLIENT SECRET !!!",
+    }
+}
+
+# Configure your database. This is for MySQL
+# See https://docs.djangoproject.com/en/4.2/ref/settings/#databases for others
+#
+# Typical settings for MySQL
+#   "NAME": "emol",
+#   "USER": "emol_db_user",
+#   "HOST": "https://db.example.com",
+#
+# For the database password, if you can inject it into the environment
+# that is a best practice. If you can't, you can put it here like
+# below but be sure to keep it secret.
+# DATABASE_PASSWORD = "your_password"
+DATABASE_PASSWORD = os.getenv("EMOL_DB_PASSWORD")
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "YOUR_DATABASE_NAME",
+        "USER": "YOUR_DATABASE_USER",
+        "PASSWORD": DATABASE_PASSWORD,
+        "HOST": "YOUR_DATABASE_HOST",
+        "PORT": "3306",
+        "OPTIONS": {
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+            "charset": "utf8mb4",
+        },
+    }
+}
+
+# !!! End of settings to configure
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+# !!! Default values that can be changed if desired
+# These are the default values for various things that you
+# can change if you want.
+
+# Number of days before expiry for reminder emails
+REMINDER_DAYS = [60, 30, 14, 0]
+
+# Global throttle config
+# This is for limiting the effect of a DDOS attack or web crawlers
+# that are hitting the site too hard. It will limit the number of
+# requests that can be made in a given window of time.
+# The default is 20 requests in 1 hour.
+# Don't set it so tight that it affects normal users!
+# But also note that authenticated users are not throttled.
+GLOBAL_THROTTLE_LIMIT = 20
+GLOBAL_THROTTLE_WINDOW = 3600
+
+# If you're not using AWS SES, you'll need to write your own emailer.
+# If you are using AWS SES, make sure AWS_REGION is set to your region.
+EMAILER = "emol.emailer.AWSEmailer"
+AWS_REGION = "ca-central-1"
+
+# !!! End of settings that can be changed
+# -------------------------------------------------------------------------------------
+
+
+
+
+
+# -------------------------------------------------------------------------------------
+# !!!! Here be dragons, change at your own risk
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 DEBUG = False
 NO_ENFORCE_PERMISSIONS = False
 
-ALLOWED_HOSTS = ["localhost"]
+ALLOWED_HOSTS = ["*"]
 
 SECURE_HSTS_SECONDS = 31536000
 
@@ -87,27 +182,13 @@ LOGGING = {
     "formatters": {
         "app": {
             "format": (
-                "%(asctime)s [%(levelname)-8s] " "(%(module)s.%(funcName)s) %(message)s"
             ),
+                "%(asctime)s [%(levelname)-8s] " "(%(module)s.%(funcName)s) %(message)s"
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
     },
 }
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "emol",
-        "USER": "emol_db_user",
-        "PASSWORD": os.getenv("EMOL_DB_PASSWORD"),
-        "HOST": "localhost",
-        "PORT": "3306",
-        "OPTIONS": {
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-            "charset": "utf8mb4",
-        },
-    }
-}
 
 CACHES = {
     "default": {
@@ -118,7 +199,6 @@ CACHES = {
 
 CACHE_TTL = 60 * 15  # 15 minutes
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "America/Toronto"
 USE_I18N = True
 USE_TZ = True
 
@@ -130,12 +210,6 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 AUTH_USER_MODEL = "sso_user.SSOUser"
-AUTHLIB_OAUTH_CLIENTS = {
-    "google": {
-        "client_id": "!!! REPLACE WITH YOUR GOOGLE OAUTH CLIENT ID !!!",
-        "client_secret": "!!! REPLACE WITH YOUR GOOGLE OAUTH CLIENT SECRET !!!",
-    }
-}
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -143,22 +217,8 @@ REST_FRAMEWORK = {
     ]
 }
 
-# AWS Stuff
-AWS_REGION = "ca-central-1"
-
 # email stuff
-SEND_EMAIL = False
-MAIL_DEFAULT_SENDER = "ealdormere.emol@gmail.com"
-
-# Kingdom stuff
-MOL_EMAIL = "ealdormere.mol@gmail.com"
-
-# Reminders app config
-REMINDER_DAYS = [60, 30, 14, 0]
-
-# Global throttle config
-GLOBAL_THROTTLE_LIMIT = 20
-GLOBAL_THROTTLE_WINDOW = 3600
+SEND_EMAIL = True
 
 # Security config
 CORS_ORIGIN_WHITELIST = [

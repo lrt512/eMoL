@@ -1,9 +1,16 @@
 #!/bin/bash
 
-if [ "$1" = "dev" ]; then
-    is_dev=true
-else
+GREEN='\033[1;32m'
+RESET='\033[0m'
+
+# create is_dev based on existence of EMOL_DEV envvar
+if [[ -z "${EMOL_DEV}" ]]; then
     is_dev=false
+else
+    is_dev=true
+    echo -e "\n"
+    echo -e "${GREEN}Dev environment${RESET}"
+    echo -e "\n"
 fi
 
 apt-get update
@@ -21,34 +28,48 @@ mkdir -p /opt/venv
 python3 -m venv /opt/venv
 source /opt/venv/bin/activate
 
-cd /opt
-git clone https://github.com/lrt512/emol.git
-chown -R www-data:www-data /opt/emol
+# dev environment via docker compose will mount the code to /mnt/emol
+if [ "$is_dev" = true ]; then
+    ln -s /mnt/emol/emol /opt/emol
+    SOURCE_DIR=/mnt/emol
+else
+    cp -R ../emol /opt
+    chown -R www-data:www-data /opt/emol
+    SOURCE_DIR=`pwd`
+fi
 
 pip install --upgrade pip
 pip install wheel
-pip install -r /opt/emol/requirements/prod.txt
+pip install -r ${SOURCE_DIR}/requirements/prod.txt
 
 chown -R www-data:www-data /opt/venv
 
 rm /etc/nginx/sites-enabled/default
-cp /opt/emol/setup_files/nginx.conf /etc/nginx/sites-enabled/
+cp ${SOURCE_DIR}/setup_files/nginx.conf /etc/nginx/sites-enabled/
 
 apt-get purge --auto-remove -y build-essential
-# apt-get clean
-# rm -rf /var/lib/apt/lists/*
-
-# if is_dev then copy /opt/emol/emol/emol/de
-
-cd /opt/emol/emol
-echo "Apply migrations"
-/opt/venv/bin/python manage.py migrate
-
-echo "Collect static files"
-/opt/venv/bin/python manage.py collectstatic --noinput
-
-echo "Create cache table if needed"
-/opt/venv/bin/python manage.py createcachetable
+apt-get clean
+rm -rf /var/lib/apt/lists/*
 
 service nginx start
-service emol start
+
+cp ${SOURCE_DIR}/setup_files/emol /etc/init.d/
+chmod +x /etc/init.d/emol
+
+# Set nginx and emol to both start on boot
+update-rc.d emol defaults
+update-rc.d nginx defaults
+
+echo -e "${GREEN}Setup complete${RESET}"
+echo -e "\n"
+echo -e "Next: Configure the database and eMol"
+echo -e "See the README for more information"
+
+
+echo -e "Then run the following commands:"
+echo -e "\n"
+echo -e "service emol start"
+echo -e "service nginx restart"
+echo -e "\n"
+echo -e "Finally, run certbot to get an SSL certificate"
+echo -e "certbot --nginx"

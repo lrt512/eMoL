@@ -159,7 +159,7 @@ MOL_EMAIL = "ealdormere.mol@gmail.com"
 REMINDER_DAYS = [60, 30, 14, 0]
 
 # Global throttle config
-GLOBAL_THROTTLE_LIMIT = 20
+GLOBAL_THROTTLE_LIMIT = 20000
 GLOBAL_THROTTLE_WINDOW = 3600
 
 # Security config
