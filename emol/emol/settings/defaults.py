@@ -5,8 +5,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = False
 NO_ENFORCE_PERMISSIONS = False
 
-ALLOWED_HOSTS = ["*"]
-
 SECURE_HSTS_SECONDS = 31536000
 
 INSTALLED_APPS = [

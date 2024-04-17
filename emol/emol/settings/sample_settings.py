@@ -1,13 +1,13 @@
 """Base settings for production deployment"""
 import os
-import boto3
-
 
 from .defaults import *  # noqa: F403, F401
 
 # -------------------------------------------------------------------------------------
 # !!! Configure these settings for your deployment
 
+# Your AWS region.
+# If you aren't hosting in AWS, you've got a lot of work to do.
 AWS_REGION = "ca-central-1"
 
 # This is the secret key for your Django application. It should be a long
@@ -18,6 +18,7 @@ SECRET_KEY = "!!! REPLACE WITH A LONG RANDOM STRING !!!"
 # SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # - or -
 # from . import get_parameter
+# import boto3
 # ssm_client = boto3.client("ssm", region_name="ca-central-1")
 # SECRET_KEY = get_parameter("/emol/secret_key", ssm_client)
 
@@ -31,6 +32,17 @@ SECRET_KEY = "!!! REPLACE WITH A LONG RANDOM STRING !!!"
 # "http://emol.yourdomain.com".
 BASE_URL = "http://yourdomain.com"
 
+# ALLOWED_HOSTS is a list of host/domain names that this Django site can serve.
+# This is a security measure to prevent HTTP Host header attacks, which are
+# possible even under many seemingly-safe web server configurations.
+# For example, if you have configured your web server to point to the Django
+# application at http://yourdomain.com, then this should be ["yourdomain.com"].
+# If it's at http://yourdomain.com/emol, then this should be ["yourdomain.com"].
+# If it's a subdomain like http://emol.yourdomain.com, then this should be
+# ["emol.yourdomain.com"].
+# You really SHOULD NOT use ["*"] here.
+ALLOWED_HOSTS = ["CHANGE_THIS_TO_YOUR_DOMAIN_NAME"]
+
 # Timezone identifier for your locale
 # See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 TIME_ZONE = "America/Toronto"
@@ -38,12 +50,12 @@ TIME_ZONE = "America/Toronto"
 # Address that emails are sent from. This is what will show up in the
 # "From" field of the email. This should be an email address that is
 # configured to send email from your server. If you are using a service
-# like AWS SES, then this must be an email address that is verified
-# in SES.
+# like AWS SES, then this probably needs to be an email address that is verified
+# in the service.
 MAIL_DEFAULT_SENDER = "emol@kingdom.org"
 
 # Email address for your kingdom MOL
-MOL_EMAIL = "mol@kingdom.org"
+MOL_EMAIL = "minister.of.lists@kingdom.org"
 
 # Configure Google authentication
 AUTHLIB_OAUTH_CLIENTS = {
@@ -81,8 +93,6 @@ DATABASES = {
     }
 }
 
-# !!! End of settings to configure
-# -------------------------------------------------------------------------------------
 
 # -------------------------------------------------------------------------------------
 # !!! Default values that can be changed if desired
@@ -105,12 +115,3 @@ GLOBAL_THROTTLE_WINDOW = 3600
 # If you're not using AWS SES, you'll need to write your own emailer.
 # If you are using AWS SES, make sure AWS_REGION is set to your region.
 EMAILER = "emol.emailer.AWSEmailer"
-AWS_REGION = "ca-central-1"
-
-# !!! End of settings that can be changed
-# -------------------------------------------------------------------------------------
-
-
-
-
-

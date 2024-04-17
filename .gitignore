@@ -170,3 +170,4 @@ tmp/
 
 static/
 .env_dev
+dev.py
