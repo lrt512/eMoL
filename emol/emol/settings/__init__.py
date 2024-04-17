@@ -1,8 +1,9 @@
 import boto3
 
+
 def get_parameter(key, ssm_client):
     """Get a parameter from AWS SSM Parameter Store
-    
+
     Args:
         key (str): The name of the parameter to get
         ssm_client (boto3.client): An SSM client

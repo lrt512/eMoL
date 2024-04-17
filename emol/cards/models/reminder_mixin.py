@@ -1,4 +1,5 @@
 """Abstract and Metaclass magic for ReminderMixin"""
+
 from abc import ABCMeta, abstractmethod
 
 from dirtyfields import DirtyFieldsMixin

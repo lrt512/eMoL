@@ -1,4 +1,5 @@
 """Proxy UserPermission checks as DRF permissions"""
+
 from rest_framework import permissions
 
 from cards.models.user_permission import UserPermission

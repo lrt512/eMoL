@@ -1,4 +1,5 @@
 """URLs for the SSO user, supporting OAuth"""
+
 from django.urls import path, re_path
 
 from . import views

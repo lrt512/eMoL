@@ -1,4 +1,5 @@
 """Base settings for production deployment"""
+
 import os
 
 from .defaults import *  # noqa: F403, F401

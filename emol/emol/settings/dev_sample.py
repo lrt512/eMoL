@@ -10,7 +10,7 @@ from .defaults import *  # noqa: F401, F403
 AWS_REGION = "ca-central-1"
 
 BASE_URL = "http://localhost:8000"
-SECRET_KEY = 'super-secret-development-key-1234'
+SECRET_KEY = "super-secret-development-key-1234"
 
 DEBUG = True
 NO_ENFORCE_PERMISSIONS = True
@@ -41,20 +41,20 @@ GLOBAL_THROTTLE_WINDOW = 3600
 # The docker-compose file sets these environment variables
 # So it will Just Work(TM) when you run `docker-compose up`
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': os.environ.get('DB_HOST'),
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "HOST": os.environ.get("DB_HOST"),
+        "NAME": os.environ.get("DB_NAME"),
+        "USER": os.environ.get("DB_USER"),
+        "PASSWORD": os.environ.get("DB_PASSWORD"),
     },
-    'cache_db': {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': os.environ.get('DB_HOST'),
-        'NAME': f"{os.environ.get('DB_NAME')}_cache",
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-    }
+    "cache_db": {
+        "ENGINE": "django.db.backends.mysql",
+        "HOST": os.environ.get("DB_HOST"),
+        "NAME": f"{os.environ.get('DB_NAME')}_cache",
+        "USER": os.environ.get("DB_USER"),
+        "PASSWORD": os.environ.get("DB_PASSWORD"),
+    },
 }
 
 # Security config

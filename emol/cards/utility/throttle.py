@@ -1,4 +1,5 @@
 """Throttle tools for emol"""
+
 from functools import wraps
 
 from django.conf import settings

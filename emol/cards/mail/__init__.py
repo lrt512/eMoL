@@ -24,7 +24,9 @@ def send_card_reminder(reminder):
             expiry_date=card.expiration_date_str,
             discipline=card.discipline.name,
         )
-        return AWSEmailer.send_email(card.combatant.email, template.get("subject"), body)
+        return AWSEmailer.send_email(
+            card.combatant.email, template.get("subject"), body
+        )
     except AttributeError:
         logger.error("Reminder %s does not have a card", reminder)
         return False
@@ -44,7 +46,9 @@ def send_card_expiry(reminder):
         body = template.get("body").format(
             discipline=card.discipline.name,
         )
-        return AWSEmailer.send_email(card.combatant.email, template.get("subject"), body)
+        return AWSEmailer.send_email(
+            card.combatant.email, template.get("subject"), body
+        )
     except AttributeError:
         logger.error("Reminder %s does not have a card", reminder)
         return False
@@ -66,7 +70,9 @@ def send_waiver_reminder(reminder):
             expiry_days=reminder.days_to_expiry,
             expiry_date=waiver.expiration_date_str,
         )
-        return AWSEmailer.send_email(waiver.combatant.email, template.get("subject"), body)
+        return AWSEmailer.send_email(
+            waiver.combatant.email, template.get("subject"), body
+        )
     except AttributeError:
         logger.error("Reminder %s does not have a waiver", reminder)
         return False
@@ -87,7 +93,9 @@ def send_waiver_expiry(reminder):
             expiry_days=reminder.days_to_expiry,
             expiry_date=reminder.due_date,
         )
-        return AWSEmailer.send_email(waiver.combatant.email, template.get("subject"), body)
+        return AWSEmailer.send_email(
+            waiver.combatant.email, template.get("subject"), body
+        )
     except AttributeError:
         logger.error("Reminder %s does not have a waiver", reminder)
         return False
