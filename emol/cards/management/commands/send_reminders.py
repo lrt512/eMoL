@@ -1,7 +1,6 @@
 import logging
 from datetime import date
 
-import pytz
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
@@ -15,7 +14,7 @@ class Command(BaseCommand):
     help = "Send reminders for expiring Cards and Waivers."
 
     def handle(self, *args, **options):
-        now = timezone.now().astimezone(pytz.utc)
+        now = timezone.now()
         due_reminders = Reminder.objects.filter(due_date__lte=now)
         count = due_reminders.count()
         logger.info(

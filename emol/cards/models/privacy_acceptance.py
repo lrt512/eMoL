@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils.crypto import get_random_string
-from pytz import timezone
+from django.utils import timezone
 
 from cards.mail import send_card_url, send_privacy_policy
 from cards.utility.names import generate_name

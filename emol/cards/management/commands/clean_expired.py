@@ -1,7 +1,6 @@
 import logging
 from datetime import date
 
-import pytz
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
@@ -15,7 +14,7 @@ class Command(BaseCommand):
     help = "Clean up expired update codes."
 
     def handle(self, *args, **options):
-        now = timezone.now().astimezone(pytz.utc)
+        now = timezone.now()
         expired_codes = UpdateCode.objects.filter(expires_at__lte=now)
         count = expired_codes.count()
         logger.info(
