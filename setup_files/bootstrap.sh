@@ -85,7 +85,7 @@ what_even_do_we_call_this() {
 }
 
 emol_dependencies() {
-    mkdir /opt/venv
+    mkdir /opt/emol_venv
     pip install -U pip setuptools wheel poetry
     poetry install --no-dev
     chown -R www-data:www-data /opt/venv

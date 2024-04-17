@@ -1,0 +1,3 @@
+[virtualenvs]
+in-project = false
+path = "/opt/emol_venv"
