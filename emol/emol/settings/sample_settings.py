@@ -1,9 +1,25 @@
 """Base settings for production deployment"""
 import os
-from pathlib import Path
+import boto3
+
+
+from .defaults import *  # noqa: F403, F401
 
 # -------------------------------------------------------------------------------------
 # !!! Configure these settings for your deployment
+
+AWS_REGION = "ca-central-1"
+
+# This is the secret key for your Django application. It should be a long
+# random string. It is used for cryptographic signing. Keep it secret!
+# Here are some possible ways to handle it:
+SECRET_KEY = "!!! REPLACE WITH A LONG RANDOM STRING !!!"
+# - or -
+# SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+# - or -
+# from . import get_parameter
+# ssm_client = boto3.client("ssm", region_name="ca-central-1")
+# SECRET_KEY = get_parameter("/emol/secret_key", ssm_client)
 
 # This is the base URL for your site. It is whatever you have configured
 # in your web server to point to the Django application. For example, if
@@ -98,167 +114,3 @@ AWS_REGION = "ca-central-1"
 
 
 
-# -------------------------------------------------------------------------------------
-# !!!! Here be dragons, change at your own risk
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-
-DEBUG = False
-NO_ENFORCE_PERMISSIONS = False
-
-ALLOWED_HOSTS = ["*"]
-
-SECURE_HSTS_SECONDS = 31536000
-
-INSTALLED_APPS = [
-    "sso_user",  # needs to be before contrib.admin
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "rest_framework",
-    "markdownx",
-    "corsheaders",
-    "cards",
-]
-
-MIDDLEWARE = [
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "global_throttle.middleware.GlobalThrottleMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
-    "csp.middleware.CSPMiddleware",
-    "django.middleware.security.SecurityMiddleware",
-    "django_permissions_policy.PermissionsPolicyMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "current_user.middleware.ThreadLocalUserMiddleware",
-]
-
-ROOT_URLCONF = "emol.urls"
-STATIC_URL = "static/"
-STATIC_ROOT = "/opt/emol/static/"
-
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["templates/"],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = "emol.wsgi.application"
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "app",
-        },
-    },
-    "root": {"level": "DEBUG", "handlers": ["console"]},
-    "loggers": {
-        "": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-    },
-    "formatters": {
-        "app": {
-            "format": (
-            ),
-                "%(asctime)s [%(levelname)-8s] " "(%(module)s.%(funcName)s) %(message)s"
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-        },
-    },
-}
-
-
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "emol_cache",
-    }
-}
-
-CACHE_TTL = 60 * 15  # 15 minutes
-LANGUAGE_CODE = "en-us"
-USE_I18N = True
-USE_TZ = True
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# Authentication config
-AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
-]
-
-AUTH_USER_MODEL = "sso_user.SSOUser"
-
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-    ]
-}
-
-# email stuff
-SEND_EMAIL = True
-
-# Security config
-CORS_ORIGIN_WHITELIST = [
-    "http://localhost",
-]
-
-SECURE_HSTS_SECONDS = 31536000
-PERMISSIONS_POLICY = {
-    "accelerometer": [],
-    "autoplay": [],
-    "camera": [],
-    "display-capture": [],
-    "encrypted-media": [],
-    "fullscreen": [],
-    "geolocation": [],
-    "gyroscope": [],
-    "magnetometer": [],
-    "microphone": [],
-    "midi": [],
-    "payment": [],
-    "usb": [],
-}
-
-CSP_IMG_SRC = ("'self'", "data:", "https://cdn.datatables.net")
-CSP_FONT_SRC = (
-    "'self'",
-    "https://maxcdn.bootstrapcdn.com",
-    "https://cdnjs.cloudflare.com",
-)
-CSP_STYLE_SRC = (
-    "'self'",
-    "'unsafe-inline'",  # needed for datatables
-    "https://cdnjs.cloudflare.com",
-    "https://maxcdn.bootstrapcdn.com",
-    "https://cdn.datatables.net",
-)
-CSP_SCRIPT_SRC = (
-    "'self'",
-    "https://cdnjs.cloudflare.com",
-    "https://maxcdn.bootstrapcdn.com",
-    "https://cdn.datatables.net",
-    "sha256-PhCsD9cDmNHcYlaLal8yHa4TGyayjyPy1/u4cyvSojQ=",
-)
