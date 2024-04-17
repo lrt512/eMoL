@@ -5,15 +5,15 @@ RESET='\033[0m'
 
 echo -e "${GREEN}Database configuration${RESET}"
 
-cd /opt/emol
+cd /opt/emol/emol
 echo "Apply migrations"
-/opt/venv/bin/python manage.py migrate
+poetry run python manage.py migrate
 
 echo "Collect static files"
-/opt/venv/bin/python manage.py collectstatic --noinput
+poetry run python manage.py collectstatic --noinput
 
 echo "Create cache table if needed"
-/opt/venv/bin/python manage.py createcachetable
+poetry run python manage.py createcachetable
 
 echo "Create superuser if needed"
-/opt/venv/bin/python manage.py ensure_superuser
+poetry run python manage.py ensure_superuser
