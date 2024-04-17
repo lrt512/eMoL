@@ -3,10 +3,14 @@
 import os
 import sys
 
+from django.core.management.base import CommandError
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "emol.settings")
+    if os.environ.get("DJANGO_SETTINGS_MODULE") == None:
+        raise CommandError("DJANGO_SETTINGS_MODULE not set")
+ 
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", None)
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

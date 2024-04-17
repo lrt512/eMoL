@@ -14,7 +14,7 @@ services:
       - DB_USER=emol_db_user
       - DB_PASSWORD=emol_db_password
     volumes:
-      - .:/mnt/emol
+      - .:/opt/emol
       - data:/mnt/data
     depends_on:
       - db
