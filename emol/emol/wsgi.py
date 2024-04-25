@@ -14,7 +14,7 @@ from django.core.management.base import CommandError
 
 from emol.settings import get_secret
 
-settings = get_secret("/emol/settings")
+settings = get_secret("/emol/django_settings_module")
 if not settings:
     raise CommandError("Could not retrieve settings path from AWS Parameter Store")
 

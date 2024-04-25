@@ -10,7 +10,7 @@ from emol.settings import get_secret
 
 def main():
     """Run administrative tasks."""
-    settings = get_secret("/emol/settings")
+    settings = get_secret("/emol/django_settings_module")
     if not settings:
         raise CommandError("Could not retrieve settings path from AWS Parameter Store")
 
