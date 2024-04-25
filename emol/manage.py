@@ -5,7 +5,7 @@ import sys
 
 from django.core.management.base import CommandError
 
-from emol.settings import get_secret
+from emol.secrets import get_secret
 
 
 def main():

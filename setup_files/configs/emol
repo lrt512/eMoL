@@ -9,8 +9,7 @@
 # Description:       Enable Gunicorn service.
 ### END INIT INFO
 
-GUNICORN=/opt/venv/bin/gunicorn
-ROOT=/opt/emol
+ROOT=/opt/emol/emol
 PID=/var/run/emol.pid
 ENV_FILE=$ROOT/.env_dev
 
@@ -18,8 +17,7 @@ case "$1" in
   start)
     echo "Starting eMoL"
     cd $ROOT
-    . $ENV_FILE
-    $GUNICORN \
+    poetry run gunicorn \
         --pid $PID \
         --workers 3 \
         --bind unix:/opt/emol/emol.sock \
@@ -30,6 +28,13 @@ case "$1" in
   stop)
     echo "Stopping Gunicorn"
     kill -9 $(cat $PID)
+    ;;
+  status)
+    if [ -f $PID ]; then
+      echo "emol (gunicorn) is running with pid: $(cat $PID)"
+    else
+      echo "emol (gunicorn) is not running"
+    fi
     ;;
   restart)
     $0 stop
