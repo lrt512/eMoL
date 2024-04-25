@@ -3,6 +3,7 @@
 GREEN='\033[1;32m'
 RESET='\033[0m'
 
+EMOL_DIR=/opt/emol
 
 # create is_dev based on existence of EMOL_DEV envvar
 # Which should only be set in the docker-compose file
@@ -68,7 +69,7 @@ system_dependencies() {
         libmysqlclient-dev
 }
 
-what_even_do_we_call_this() {
+environment_specific_setup() {
     if [ "$is_dev" = true ]; then
         # We'll also need to create a .env_dev file so we can get the
         # environment variables for the dev environment in the init script
@@ -85,10 +86,12 @@ what_even_do_we_call_this() {
 }
 
 emol_dependencies() {
+    pushd /opt/emol
     mkdir /opt/emol_venv
     pip install -U pip setuptools wheel poetry
     poetry install --no-dev
-    chown -R www-data:www-data /opt/venv
+    chown -R www-data:www-data /opt/emol_venv
+    popd
 }
 
 configure_nginx() {
@@ -109,9 +112,9 @@ configure_emol() {
 
 
 system_dependencies
-emol_dependencies
 install_emol
-what_even_do_we_call_this
+emol_dependencies
+environment_specific_setup
 # cleanup_build
 configure_nginx
 configure_emol

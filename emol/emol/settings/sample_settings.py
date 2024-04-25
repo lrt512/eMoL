@@ -2,6 +2,7 @@
 
 import os
 
+from emol.secrets import get_secret
 from .defaults import *  # noqa: F403, F401
 
 # -------------------------------------------------------------------------------------
@@ -14,14 +15,11 @@ AWS_REGION = "ca-central-1"
 # This is the secret key for your Django application. It should be a long
 # random string. It is used for cryptographic signing. Keep it secret!
 # Here are some possible ways to handle it:
-SECRET_KEY = "!!! REPLACE WITH A LONG RANDOM STRING !!!"
+SECRET_KEY = get_secret("/emol/secret_key")
 # - or -
 # SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # - or -
-# from . import get_parameter
-# import boto3
-# ssm_client = boto3.client("ssm", region_name="ca-central-1")
-# SECRET_KEY = get_parameter("/emol/secret_key", ssm_client)
+# SECRET_KEY = "!!! REPLACE WITH A RANDOM STRING !!!"
 
 # This is the base URL for your site. It is whatever you have configured
 # in your web server to point to the Django application. For example, if
@@ -69,23 +67,17 @@ AUTHLIB_OAUTH_CLIENTS = {
 # Configure your database. This is for MySQL
 # See https://docs.djangoproject.com/en/4.2/ref/settings/#databases for others
 #
-# Typical settings for MySQL
-#   "NAME": "emol",
-#   "USER": "emol_db_user",
-#   "HOST": "https://db.example.com",
-#
 # For the database password, if you can inject it into the environment
 # that is a best practice. If you can't, you can put it here like
 # below but be sure to keep it secret.
 # DATABASE_PASSWORD = "your_password"
-DATABASE_PASSWORD = os.getenv("EMOL_DB_PASSWORD")
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "YOUR_DATABASE_NAME",
-        "USER": "YOUR_DATABASE_USER",
-        "PASSWORD": DATABASE_PASSWORD,
-        "HOST": "YOUR_DATABASE_HOST",
+        "NAME": get_secret("/emol/db_name"),
+        "USER": get_secret("/emol/db_user"),
+        "PASSWORD": get_secret("/emol/db_password"),
+        "HOST": get_secret("/emol/db_host"),
         "PORT": "3306",
         "OPTIONS": {
             "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
