@@ -1,12 +1,21 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
+import os
 import sys
 
 from django.core.management.base import CommandError
 
+from emol.settings import get_secret
+
 
 def main():
     """Run administrative tasks."""
+    settings = get_secret("/emol/settings")
+    if not settings:
+        raise CommandError("Could not retrieve settings path from AWS Parameter Store")
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

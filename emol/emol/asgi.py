@@ -8,6 +8,16 @@ https://docs.djangoproject.com/en/4.0/howto/deployment/asgi/
 """
 
 
+import os
 from django.core.asgi import get_asgi_application
+from django.core.management.base import CommandError
+
+from emol.settings import get_secret
+
+settings = get_secret("/emol/settings")
+if not settings:
+    raise CommandError("Could not retrieve settings path from AWS Parameter Store")
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
 
 application = get_asgi_application()

@@ -59,8 +59,8 @@ MOL_EMAIL = "minister.of.lists@kingdom.org"
 # Configure Google authentication
 AUTHLIB_OAUTH_CLIENTS = {
     "google": {
-        "client_id": "!!! REPLACE WITH YOUR GOOGLE OAUTH CLIENT ID !!!",
-        "client_secret": "!!! REPLACE WITH YOUR GOOGLE OAUTH CLIENT SECRET !!!",
+        "client_id": get_secret("/emol/oauth_client_id"),
+        "client_secret": get_secret("/emol/oauth_client_secret"),
     }
 }
 
