@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.core.cache import cache
 from django.shortcuts import render
-
+from django.urls import resolve
 
 class GlobalThrottleMiddleware:
     """Global throttle middleware
@@ -29,7 +29,7 @@ class GlobalThrottleMiddleware:
 
     def __init__(self, get_response):
         self.get_response = get_response
-        self.request_limit = getattr(settings, "GLOBAL_THROTTLE_LIMIT", 5)
+        self.request_limit = getattr(settings, "GLOBAL_THROTTLE_LIMIT", 10)
         self.request_window = getattr(settings, "GLOBAL_THROTTLE_WINDOW", 3600)
 
     def maybe_throttle(self, request):
@@ -38,6 +38,10 @@ class GlobalThrottleMiddleware:
         Returns True if the IP address should be throttled, False otherwise.
         """
         if request.user.is_authenticated:
+            return False
+
+        view_func = resolve(request.path).func
+        if getattr(view_func, "exempt_from_throttling", False):
             return False
 
         ip_address = request.META.get("REMOTE_ADDR")

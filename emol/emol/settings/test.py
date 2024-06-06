@@ -33,10 +33,6 @@ MOL_EMAIL = "kingdom.mol@gmail.com"
 # Reminders app config
 REMINDER_DAYS = [60, 30, 14, 0]
 
-# Global throttle config
-GLOBAL_THROTTLE_LIMIT = 20000
-GLOBAL_THROTTLE_WINDOW = 3600
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
