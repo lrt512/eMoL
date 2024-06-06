@@ -1,0 +1,54 @@
+import os
+
+from emol.cloud import get_secret
+
+from .defaults import *  # noqa: F401, F403
+
+AWS_REGION = "ca-central-1"
+
+BASE_URL = "http://localhost:8000"
+SECRET_KEY = 'super-secret-test-key-1234'
+
+DEBUG = True
+NO_ENFORCE_PERMISSIONS = True
+ALLOWED_HOSTS = ["localhost"]
+
+# Configure Google authentication
+AUTHLIB_OAUTH_CLIENTS = {
+    "google": {
+        "client_id": "..fake..",
+        "client_secret": "..fake..",
+    }
+}
+
+TIME_ZONE = "America/Toronto"
+
+# email stuff
+SEND_EMAIL = False
+MAIL_DEFAULT_SENDER = "kingdom.emol@gmail.com"
+
+# Kingdom stuff
+MOL_EMAIL = "kingdom.mol@gmail.com"
+
+# Reminders app config
+REMINDER_DAYS = [60, 30, 14, 0]
+
+# Global throttle config
+GLOBAL_THROTTLE_LIMIT = 20000
+GLOBAL_THROTTLE_WINDOW = 3600
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'test.sqlite3'),
+    },
+    'cache_db': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'test_cache.sqlite3'),
+    }
+}
+
+# Security config
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost",
+]
