@@ -12,7 +12,7 @@ import os
 from django.core.asgi import get_asgi_application
 from django.core.management.base import CommandError
 
-from emol.secrets import get_secret
+from emol.cloud import get_secret
 
 settings = get_secret("/emol/django_settings_module")
 if not settings:

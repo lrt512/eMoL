@@ -1,4 +1,3 @@
-# !!! This is only used for development.
 version: '3.8'
 services:
   app:
@@ -6,18 +5,40 @@ services:
     ports:
       - "8000:80"
     environment:
-      - DJANGO_SECRET_KEY=super_secret_key
       - DJANGO_SETTINGS_MODULE=emol.settings.dev
       - EMOL_DEV=1
-      - DB_HOST=db
-      - DB_NAME=emol
-      - DB_USER=emol_db_user
-      - DB_PASSWORD=emol_db_password
+      - AWS_DEFAULT_REGION=ca-central-1
+      - SSM_ENDPOINT_URL=http://localstack:4566
+      - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}          # From the .env file
+      - OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}  # From the .env file
+    # Dockerfile leaves us at WORKDIR /opt/emol/emol/ for the entrypoint
+    entrypoint: > 
+      sh -c "
+        /opt/emol/setup_files/bootstrap.sh &&
+        /opt/emol/setup_files/db.sh &&
+        poetry run python manage.py runserver 0.0.0.0:80
+      "    
     volumes:
       - .:/opt/emol
       - data:/mnt/data
     depends_on:
       - db
+      - localstack
+
+  localstack:
+    image: localstack/localstack
+    environment:
+      - SERVICES=ssm
+      - DEBUG=1
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+    environment:
+      # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
+      - DEBUG=${DEBUG:-0}
+    volumes:
+      - localstack:/var/lib/localstack
+      - "/var/run/docker.sock:/var/run/docker.sock"
 
   db:
     image: mysql:latest
@@ -32,3 +53,4 @@ services:
 volumes:
   data:
   mysql_data:
+  localstack:

@@ -54,31 +54,24 @@ cleanup_build() {
     rm -rf /var/lib/apt/lists/*
 }
 
-system_dependencies() {
-    echo -e "\n"
-    echo -e "Installing dependencies..."
-    apt-get update
-    apt-get install -y \
-        nginx certbot \
-        git python3-venv python3-pip \
-        python3-certbot-nginx
-
-    apt-get install -y --no-install-recommends \
-        build-essential pkg-config  \
-        python3-dev \
-        libmysqlclient-dev
-}
-
 environment_specific_setup() {
     if [ "$is_dev" = true ]; then
         # We'll also need to create a .env_dev file so we can get the
         # environment variables for the dev environment in the init script
-        output_file="/opt/emol/.env_dev"
-        env_vars="DJANGO_SETTINGS_MODULE DB_HOST DB_NAME DB_USER DB_PASSWORD"
-        echo "" > $output_file
-        for var in $env_vars; do
-            echo "export $var=${!var}" >> $output_file
-        done
+        # output_file="/opt/emol/.env_dev"
+        # env_vars="DJANGO_SETTINGS_MODULE DB_HOST DB_NAME DB_USER DB_PASSWORD"
+        # echo "" > $output_file
+        # for var in $env_vars; do
+        #     echo "export $var=${!var}" >> $output_file
+        # done
+
+        aws ssm put-parameter --name "/emol/django_settings_module" --value "emol.settings.dev" --type "SecureString" --endpoint-url "http://localstack:4566"
+        aws ssm put-parameter --name "/emol/oauth_client_id" --value "$OAUTH_CLIENT_ID" --type "SecureString" --endpoint-url "http://localstack:4566"
+        aws ssm put-parameter --name "/emol/oauth_client_secret" --value "$OAUTH_CLIENT_SECRET" --type "SecureString" --endpoint-url "http://localstack:4566"
+        aws ssm put-parameter --name "/emol/db_host" --value "db" --type "SecureString" --endpoint-url "http://localstack:4566"
+        aws ssm put-parameter --name "/emol/db_name" --value "emol" --type "SecureString" --endpoint-url "http://localstack:4566"
+        aws ssm put-parameter --name "/emol/db_user" --value "emol_db_user" --type "SecureString" --endpoint-url "http://localstack:4566"
+        aws ssm put-parameter --name "/emol/db_password" --value "emol_db_password" --type "SecureString" --endpoint-url "http://localstack:4566"
     else
         # In the real world, www-data needs to own the files    
         chown -R www-data:www-data /opt/emol
@@ -87,9 +80,7 @@ environment_specific_setup() {
 
 emol_dependencies() {
     pushd /opt/emol
-    mkdir /opt/emol_venv
-    pip install -U pip setuptools wheel poetry
-    poetry install --no-dev
+    poetry install --only main
     chown -R www-data:www-data /opt/emol_venv
     popd
 }
@@ -111,13 +102,13 @@ configure_emol() {
 }
 
 
-system_dependencies
 install_emol
 emol_dependencies
 environment_specific_setup
-# cleanup_build
-configure_nginx
-configure_emol
-
+if [ "$is_dev" = false ]; then
+    # cleanup_build
+    configure_nginx
+    configure_emol
+fi
 echo -e "\n"
 echo -e "${GREEN}Bootstrap complete${RESET}"

@@ -11,7 +11,6 @@
 
 ROOT=/opt/emol/emol
 PID=/var/run/emol.pid
-ENV_FILE=$ROOT/.env_dev
 
 case "$1" in
   start)
@@ -41,7 +40,7 @@ case "$1" in
     $0 start
     ;;
   *)
-    echo "Usage: /etc/init.d/gunicorn {start|stop|restart}"
+    echo "Usage: /etc/init.d/emol {start|stop|restart}"
     exit 1
     ;;
 esac

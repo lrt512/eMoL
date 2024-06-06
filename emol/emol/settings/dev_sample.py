@@ -1,5 +1,7 @@
 import os
 
+from emol.cloud import get_secret
+
 from .defaults import *  # noqa: F401, F403
 
 # Sample settings for development environment settings.
@@ -19,8 +21,8 @@ ALLOWED_HOSTS = ["localhost"]
 # Configure Google authentication
 AUTHLIB_OAUTH_CLIENTS = {
     "google": {
-        "client_id": "!!! REPLACE WITH YOUR GOOGLE OAUTH CLIENT ID !!!",
-        "client_secret": "!!! REPLACE WITH YOUR GOOGLE OAUTH CLIENT SECRET !!!",
+        "client_id": get_secret("/emol/oauth_client_id"),
+        "client_secret": get_secret("/emol/oauth_client_secret"),
     }
 }
 
