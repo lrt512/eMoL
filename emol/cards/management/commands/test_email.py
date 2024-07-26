@@ -16,7 +16,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         recipient = kwargs['recipient']
         subject = 'Test Email from eMoL'
-        body = 'This is a test email sent bu eMoL using the AWSEmailer class.'
+        body = 'This is a test email sent by eMoL using the AWSEmailer class.'
 
         success = AWSEmailer.send_email(recipient, subject, body)
 

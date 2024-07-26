@@ -2,9 +2,10 @@
 
 import logging
 
-import boto3
 from botocore.exceptions import ClientError
 from django.conf import settings
+
+from emol.secrets import get_aws_session
 
 logger = logging.getLogger("cards")
 
@@ -44,7 +45,8 @@ class AWSEmailer:
         sender = f"Ealdormere eMoL <{settings.MAIL_DEFAULT_SENDER}>"
         aws_region = settings.AWS_REGION
 
-        client = boto3.client("ses", region_name=aws_region)
+        session = get_aws_session()
+        client = session.client("ses")
         try:
             # Provide the contents of the email.
             response = client.send_email(

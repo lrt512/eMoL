@@ -2,7 +2,7 @@
 
 import os
 
-from emol.cloud import get_secret
+from emol.secrets import get_secret
 from .defaults import *  # noqa: F403, F401
 
 # -------------------------------------------------------------------------------------
