@@ -29,8 +29,12 @@ def privacy_policy(request, code=None):
             raise HttpResponseBadRequest
 
         if "accept" in request.POST:
-            combatant.accept_privacy_policy()
-            return render(request, "privacy/privacy_accepted.html", {})
+            sent_email = combatant.accept_privacy_policy()
+            context = {
+                "card_url": combatant.card_url,
+                "sent_email": True,
+            }
+            return render(request, "privacy/privacy_accepted.html", context)
         elif "decline" in request.POST:
             combatant.delete()
             return render(request, "privacy/privacy_declined.html", {})

@@ -15,20 +15,23 @@ class AWSEmailer:
 
     SES configuration in settings.py:
         AWS_REGION = your AWS region
-        MAIL_DEFAULT_SENDER = 'eMoL <emol@example.com>'
+        MAIL_DEFAULT_SENDER = 'ealdormere.emol@gmail.com'
+        MOL_EMAIL = 'ealdormere.mol@gmail.com'
 
     """
 
     CHARSET = "UTF-8"
 
     @classmethod
-    def send_email(cls, recipient, subject, body):
+    def send_email(cls, recipient, subject, body, from_email=None, reply_to=None):
         """Send an email
 
         Args:
             recipient: Recipient's email address
             subject: The email's subject
             body: Email message text
+            from_email: Optional sender email address
+            reply_to: Optional reply-to email address (defaults to settings.MOL_EMAIL)
 
         Returns:
             True if the message was delivered
@@ -42,20 +45,20 @@ class AWSEmailer:
         else:
             logger.info("Sending email to %s: %s", recipient, subject)
 
-        sender = f"Ealdormere eMoL <{settings.MAIL_DEFAULT_SENDER}>"
-        aws_region = settings.AWS_REGION
-
+        from_email = from_email or settings.MAIL_DEFAULT_SENDER
+        reply_to = reply_to or settings.MOL_EMAIL
+        sender = f"Ealdormere eMoL <{from_email}>"
+        
         session = get_aws_session()
         client = session.client("ses")
         try:
-            # Provide the contents of the email.
-            response = client.send_email(
-                Destination={
+            email_args = {
+                "Destination": {
                     "ToAddresses": [
                         recipient,
                     ],
                 },
-                Message={
+                "Message": {
                     "Body": {
                         "Text": {"Charset": cls.CHARSET, "Data": body},
                     },
@@ -64,16 +67,18 @@ class AWSEmailer:
                         "Data": subject,
                     },
                 },
-                Source=sender,
-                # If you are not using a configuration set, comment or delete the
-                # following line
-                # ConfigurationSetName=CONFIGURATION_SET,
-            )
+                "Source": sender,
+                "ReplyToAddresses": [reply_to],  # Always include reply-to
+            }
+
+            response = client.send_email(**email_args)
+
         except ClientError as exc:
             logger.error(f"Error sending mail to {recipient}")
             logger.exception(exc)
+            return False
         else:
             logger.debug(
-                f"Email {subject} sent to {recipient}.  Message ID: {response['MessageId']}"
+                f"Email {subject} sent to {recipient}. Message ID: {response['MessageId']}"
             )
             return True

@@ -37,8 +37,8 @@ class GlobalThrottleMiddleware:
 
         Returns True if the IP address should be throttled, False otherwise.
         """
-        if request.user.is_authenticated:
-            return False
+        # if request.user.is_authenticated:
+        return False
 
         view_func = resolve(request.path).func
         if getattr(view_func, "exempt_from_throttling", False):

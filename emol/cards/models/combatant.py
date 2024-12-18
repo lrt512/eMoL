@@ -198,7 +198,7 @@ class Combatant(models.Model):
                 break
 
         self.save()
-        send_card_url(self)
+        return send_card_url(self)
 
 
 def membership_valid(self, on_date=None):

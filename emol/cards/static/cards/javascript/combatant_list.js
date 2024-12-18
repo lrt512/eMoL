@@ -193,7 +193,7 @@
                 toastr.success("Combatant information saved");
                 $("#uuid").val(xhr.responseJSON.uuid);
                 callback();
-                fetch_waiver_date();
+                // --> fetch_waiver_date();
             },
             error: function (xhr, status, error) {
                 toastr.error("Error saving combatant information: " + error);
