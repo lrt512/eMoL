@@ -5,13 +5,10 @@ services:
     ports:
       - "8000:80"
     environment:
-      - DJANGO_SETTINGS_MODULE=emol.settings.dev
       - EMOL_DEV=1
       - AWS_DEFAULT_REGION=ca-central-1
-      - SSM_ENDPOINT_URL=http://localstack:4566
-      - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}          # From the .env file
-      - OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}  # From the .env file
-    # Dockerfile leaves us at WORKDIR /opt/emol/emol/ for the entrypoint
+      - SSM_ENDPOINT_URL=http://host.docker.internal:4566
+      - OAUTH_PROVIDER_URL=http://host.docker.internal:8080
     entrypoint: > 
       sh -c "
         /opt/emol/setup_files/bootstrap.sh &&
@@ -24,21 +21,27 @@ services:
     depends_on:
       - db
       - localstack
+      - oauth-mock
+    env_file:
+      - .env
+    networks:
+      - emol-network
 
   localstack:
     image: localstack/localstack
     environment:
       - SERVICES=ssm
       - DEBUG=1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=ca-central-1
     ports:
-      - "127.0.0.1:4566:4566"            # LocalStack Gateway
-      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
-    environment:
-      # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
-      - DEBUG=${DEBUG:-0}
+      - "4566:4566"
+      - "4510-4559:4510-4559"
     volumes:
-      - localstack:/var/lib/localstack
       - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - emol-network
 
   db:
     image: mysql:latest
@@ -49,8 +52,20 @@ services:
       - MYSQL_ROOT_PASSWORD=root_password
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - emol-network
+
+  oauth-mock:
+    image: ghcr.io/navikt/mock-oauth2-server:2.1.1
+    ports:
+      - "8080:8080"
+    networks:
+      - emol-network
+
+networks:
+  emol-network:
+    driver: bridge
 
 volumes:
   data:
   mysql_data:
-  localstack:

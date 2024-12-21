@@ -1,52 +1,96 @@
-# Installation and Configuration
+# eMoL (electronic Ministry of Lists)
 
-## Basic installation and system prep
-* Clone the repository
-* Enter the `setup_files` directory
-* Ensure the script files are executable: 
-    * `chmod +x *.sh`
-* Run the `setup.sh` script
+## Development Setup
 
-## Configure Google authentication
-* Go to the Google Developers Console (https://console.developers.google.com/).
-* Create a new project or select an existing project.
-* In the left sidebar, click on `Credentials`.
-* Click on `Create credentials` and select `OAuth client ID`.
-* Select `Web application` as the application type.
-* Set the name for your OAuth client ID (e.g., `eMoL`).
-* In the `Authorized JavaScript origins` section, add the URL of your eMoL application (e.g., `https://your-emol-url.com`).
-* In the `Authorized redirect URIs` section, add the following URIs:
-    * `https://your-emol-url.com/accounts/google/login/callback/`
-    * `http://localhost:8000/accounts/google/login/callback/` (for local development)
-    * Note: Replace `your-emol-url.com` with your actual eMoL application URL.
-* Click on `Create` to generate the client ID and client secret.
-* Make a note of the generated client ID and client secret.
+### Prerequisites
+- Docker and Docker Compose
+- Git
 
-## Configure the database
-* Create a database named `emol`
-* Create a user and password for eMoL to use
-* Grant permissions to the eMoL user on the `emol` database
-
-## Configure eMoL
-* In `/opt/emol/emol/settings` make a copy of `sample_settings.py`:
+### Quick Start
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd emol
 ```
-cp sample_settings.py settings.py
+
+2. Start the development environment:
+```bash
+./run_local.sh up
 ```
-* Edit `settings.py` with a text editor
-* Change the value of `BASE_URL` to the URL you will use
-* Set the value of `TIME_ZONE` for your locale
-* Locate the `AUTHLIB_OAUTH_CLIENTS` section in settings.py.
-    * Set the value of `client_id` to your Google client ID.
-    * Set the value of `client_secret` to your Google client secret.
-* Locate the `DATABASES` block in your `settings.py`
-    * Update the block with the credentials you generated for the eMoL user
-    * The sample in `sample_settings.py` is for MySQL
-        * If you are using a different database, consult the [Django documentation](https://docs.djangoproject.com/en/4.2/ref/settings/#databases )
-  
 
-## Prepare the database
-* Run the `db.py` script to apply migrations and collect static files
+3. Access the application at http://localhost:8000
 
-## Set up cron
-* Run `setup_cron.sh` from the `setup_files` directory.
-    * The script is idempotent, so you can run it multiple times without worry
+### Development Environment
+
+The development environment includes:
+- Django application server
+- MySQL database
+- LocalStack (for AWS SSM Parameter Store emulation)
+- Mock OAuth server for authentication
+
+#### Development Tools
+
+The `run_local.sh` script provides several commands:
+```bash
+./run_local.sh up      # Start the development environment
+./run_local.sh down    # Stop the development environment
+./run_local.sh shell   # Open a shell in the app container
+./run_local.sh manage  # Run Django management commands
+```
+
+#### Authentication
+
+Development uses a mock OAuth server that accepts any registered user:
+1. Log in with that user's email (password can be anything)
+2. The mock server provides OAuth tokens just like Google would
+
+#### Database
+
+The development database:
+- Runs in a Docker container
+- Uses MySQL
+- Persists data between restarts in a Docker volume
+- Automatically configured with test credentials
+
+## Production Setup
+
+### Google OAuth Configuration
+1. Go to the Google Developers Console (https://console.developers.google.com/)
+2. Create a new project or select an existing project
+3. Enable the Google OAuth2 API
+4. Create OAuth credentials:
+   - Application type: Web application
+   - Add authorized redirect URIs:
+     - https://your-domain.com/auth/callback
+     - https://your-domain.com/auth/admin/oauth/
+
+### AWS Configuration
+Store the following parameters in SSM Parameter Store:
+- `/emol/django_settings_module`
+- `/emol/oauth_client_id` (from Google OAuth setup)
+- `/emol/oauth_client_secret` (from Google OAuth setup)
+- `/emol/db_host`
+- `/emol/db_name`
+- `/emol/db_user`
+- `/emol/db_password`
+
+### Database Setup
+1. Create a MySQL database
+2. Create database user with appropriate permissions
+3. Update SSM parameters with database credentials
+
+### Application Deployment
+1. Clone the repository
+2. Run the installation script:
+```bash
+cd setup_files
+chmod +x *.sh
+./setup.sh
+```
+
+3. Configure nginx (if needed)
+4. Start the application service
+
+## Contributing
+
+Please see CONTRIBUTING.md for development guidelines and coding standards.

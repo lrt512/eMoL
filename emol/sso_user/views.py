@@ -27,10 +27,11 @@ def oauth_callback(request):
     token = oauth.google.authorize_access_token(request)
 
     userinfo = token.get("userinfo")
+    print(userinfo)
     if userinfo is None:
         raise ValueError("OAuth provider did not return userinfo")
 
-    email = userinfo.get("email")
+    email = userinfo.get("email") or userinfo.get("sub")
     if email is None:
         raise ValueError("OAuth provider did not return user email")
 
@@ -63,7 +64,7 @@ def admin_oauth(request):
         messages.error(request, "OAuth provider did not return userinfo")
         return redirect("admin:login")
 
-    email = userinfo.get("email")
+    email = userinfo.get("email") or userinfo.get("sub")
     if email is None:
         messages.error(request, "OAuth provider did not return user email")
         response = redirect("admin:login")

@@ -66,8 +66,8 @@ environment_specific_setup() {
         # done
 
         aws ssm put-parameter --name "/emol/django_settings_module" --value "emol.settings.dev" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/oauth_client_id" --value "$OAUTH_CLIENT_ID" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/oauth_client_secret" --value "$OAUTH_CLIENT_SECRET" --type "SecureString" --endpoint-url "http://localstack:4566"
+        aws ssm put-parameter --name "/emol/oauth_client_id" --value "mock-client-id" --type "SecureString" --endpoint-url "http://localstack:4566"
+        aws ssm put-parameter --name "/emol/oauth_client_secret" --value "mock-client-secret" --type "SecureString" --endpoint-url "http://localstack:4566"
         aws ssm put-parameter --name "/emol/db_host" --value "db" --type "SecureString" --endpoint-url "http://localstack:4566"
         aws ssm put-parameter --name "/emol/db_name" --value "emol" --type "SecureString" --endpoint-url "http://localstack:4566"
         aws ssm put-parameter --name "/emol/db_user" --value "emol_db_user" --type "SecureString" --endpoint-url "http://localstack:4566"
