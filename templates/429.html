@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="error-page">
+    <h1>Rate Limit Exceeded</h1>
+    <p>Too many requests have been made from your IP address. Please try again in an hour.</p>
+    
+    {% if user.is_authenticated %}
+    <p>Note: You shouldn't see this message when logged in. Please report this as a bug.</p>
+    {% else %}
+    <p>Consider <a href="{% url 'login' %}">logging in</a> to avoid rate limiting.</p>
+    {% endif %}
+</div>
+{% endblock %} 
