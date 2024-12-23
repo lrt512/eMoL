@@ -23,6 +23,7 @@ def send_card_reminder(reminder):
             expiry_days=reminder.days_to_expiry,
             expiry_date=card.expiration_date_str,
             discipline=card.discipline.name,
+            combatant_name=card.combatant.name,
         )
         return AWSEmailer.send_email(
             card.combatant.email, template.get("subject"), body
@@ -45,6 +46,7 @@ def send_card_expiry(reminder):
         template = EMAIL_TEMPLATES.get("card_expiry")
         body = template.get("body").format(
             discipline=card.discipline.name,
+            combatant_name=card.combatant.name,
         )
         return AWSEmailer.send_email(
             card.combatant.email, template.get("subject"), body
@@ -69,6 +71,7 @@ def send_waiver_reminder(reminder):
         body = template.get("body").format(
             expiry_days=reminder.days_to_expiry,
             expiry_date=waiver.expiration_date_str,
+            combatant_name=waiver.combatant.name,
         )
         return AWSEmailer.send_email(
             waiver.combatant.email, template.get("subject"), body
@@ -92,6 +95,7 @@ def send_waiver_expiry(reminder):
         body = template.get("body").format(
             expiry_days=reminder.days_to_expiry,
             expiry_date=reminder.due_date,
+            combatant_name=waiver.combatant.name,
         )
         return AWSEmailer.send_email(
             waiver.combatant.email, template.get("subject"), body
@@ -110,7 +114,7 @@ def send_info_update(combatant, update_code):
 
     """
     template = EMAIL_TEMPLATES.get("info_update")
-    body = template.get("body").format(update_url=update_code.url)
+    body = template.get("body").format(update_url=update_code.url, combatant_name=combatant.name)
     return AWSEmailer.send_email(combatant.email, template.get("subject"), body)
 
 
@@ -126,7 +130,7 @@ def send_card_url(combatant):
 
     """
     template = EMAIL_TEMPLATES.get("card_url")
-    body = template.get("body").format(card_url=combatant.card_url)
+    body = template.get("body").format(card_url=combatant.card_url, combatant_name=combatant.name)
     return AWSEmailer.send_email(combatant.email, template.get("subject"), body)
 
 
@@ -141,5 +145,5 @@ def send_privacy_policy(combatant):
 
     """
     template = EMAIL_TEMPLATES.get("privacy_policy")
-    body = template.get("body").format(privacy_policy_url=privacy_policy_url(combatant))
+    body = template.get("body").format(privacy_policy_url=privacy_policy_url(combatant), combatant_name=combatant.name)
     return AWSEmailer.send_email(combatant.email, template.get("subject"), body)
