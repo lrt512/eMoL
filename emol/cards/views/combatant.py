@@ -4,7 +4,7 @@ import logging
 
 from django.shortcuts import redirect, render
 
-from cards.models import Authorization, Combatant, Discipline, UpdateCode
+from cards.models import Authorization, Combatant, Discipline, Region
 from cards.utility.decorators import permission_required
 from current_user import get_current_user
 
@@ -32,6 +32,7 @@ def combatant_detail(request):
         "user": get_current_user(),
         "disciplines": Discipline.objects.all(),
         "authorizations": Authorization.objects.all(),
+        "regions": Region.objects.all(),
     }
     return render(request, "combatant/combatant_detail.html", context)
 

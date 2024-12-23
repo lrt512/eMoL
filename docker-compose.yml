@@ -22,8 +22,6 @@ services:
       - db
       - localstack
       - oauth-mock
-    env_file:
-      - .env
     networks:
       - emol-network
 

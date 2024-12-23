@@ -19,8 +19,6 @@ from django.urls import reverse
 from cards.mail import send_card_url, send_privacy_policy
 from cards.utility.names import generate_name
 
-from .card import Card
-from .discipline import Discipline
 from .permissioned_db_fields import (
     PermissionedCharField,
     PermissionedDateField,
@@ -116,6 +114,7 @@ class Combatant(models.Model):
         null=False,
         default="ON",
         permissions=["read_combatant_info", "write_combatant_info"],
+        help_text="Region code (state/province)"
     )
     postal_code = PermissionedCharField(
         max_length=7,
