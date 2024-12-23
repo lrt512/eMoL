@@ -114,7 +114,7 @@ class Combatant(models.Model):
         null=False,
         default="ON",
         permissions=["read_combatant_info", "write_combatant_info"],
-        help_text="Region code (state/province)"
+        help_text="Region code (state/province)",
     )
     postal_code = PermissionedCharField(
         max_length=7,

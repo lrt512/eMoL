@@ -114,7 +114,9 @@ def send_info_update(combatant, update_code):
 
     """
     template = EMAIL_TEMPLATES.get("info_update")
-    body = template.get("body").format(update_url=update_code.url, combatant_name=combatant.name)
+    body = template.get("body").format(
+        update_url=update_code.url, combatant_name=combatant.name
+    )
     return AWSEmailer.send_email(combatant.email, template.get("subject"), body)
 
 
@@ -130,7 +132,9 @@ def send_card_url(combatant):
 
     """
     template = EMAIL_TEMPLATES.get("card_url")
-    body = template.get("body").format(card_url=combatant.card_url, combatant_name=combatant.name)
+    body = template.get("body").format(
+        card_url=combatant.card_url, combatant_name=combatant.name
+    )
     return AWSEmailer.send_email(combatant.email, template.get("subject"), body)
 
 
@@ -145,5 +149,7 @@ def send_privacy_policy(combatant):
 
     """
     template = EMAIL_TEMPLATES.get("privacy_policy")
-    body = template.get("body").format(privacy_policy_url=privacy_policy_url(combatant), combatant_name=combatant.name)
+    body = template.get("body").format(
+        privacy_policy_url=privacy_policy_url(combatant), combatant_name=combatant.name
+    )
     return AWSEmailer.send_email(combatant.email, template.get("subject"), body)

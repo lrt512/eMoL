@@ -29,7 +29,11 @@ class SelfServeUpdateSerializer(ModelSerializer):
         ]
 
         extra_kwargs = {
-            "member_expiry": {"format": "%Y-%m-%d", "allow_null": True, "required": False},
+            "member_expiry": {
+                "format": "%Y-%m-%d",
+                "allow_null": True,
+                "required": False,
+            },
             "member_number": {"required": False},
             "address2": {"required": False},
             "sca_name": {"required": False},
@@ -54,9 +58,11 @@ class SelfServeUpdateSerializer(ModelSerializer):
         Ensure that if member_expiry is specified, then member_number is also specified.
         """
         if data.get("member_expiry") and not data.get("member_number"):
-            raise serializers.ValidationError({
-                "member_number": "Member number is required when specifying an expiry date."
-            })
+            raise serializers.ValidationError(
+                {
+                    "member_number": "Member number is required when specifying an expiry date."
+                }
+            )
         return data
 
     def to_internal_value(self, data):
@@ -88,24 +94,27 @@ def self_serve_update(request, code):
     """Handle self-serve updates"""
     try:
         update_code = UpdateCode.objects.get(code=code)
-        context = {"self_serve": True, "code": code, "combatant": update_code.combatant, "regions": Region.objects.all()}
-        
+        context = {
+            "self_serve": True,
+            "code": code,
+            "combatant": update_code.combatant,
+            "regions": Region.objects.all(),
+        }
+
         if request.method == "GET":
             return render(request, "combatant/self_serve_update.html", context)
-        
+
         serializer = SelfServeUpdateSerializer(
-            instance=update_code.combatant, 
-            data=request.POST, 
-            partial=True
+            instance=update_code.combatant, data=request.POST, partial=True
         )
-        
+
         if not serializer.is_valid():
             context["message"] = "There was an error updating your information."
             context["errors"] = serializer_errors_to_strings(serializer)
             logger.error(
                 "Self-serve update failed for code %s with errors: %s",
                 code,
-                serializer.errors
+                serializer.errors,
             )
             return render(request, "combatant/self_serve_update.html", context)
 
@@ -113,24 +122,26 @@ def self_serve_update(request, code):
         logger.info(
             "Successfully updated combatant information for code %s, combatant_id: %s",
             code,
-            update_code.combatant.id
+            update_code.combatant.id,
         )
         update_code.delete()
         return render(
             request,
             "message/message.html",
-            {"message": "Your information has been updated successfully."}
+            {"message": "Your information has been updated successfully."},
         )
     except UpdateCode.DoesNotExist:
         return render(
             request,
             "message/message.html",
-            {"message": "The update code provided is invalid or has already been used."}
+            {
+                "message": "The update code provided is invalid or has already been used."
+            },
         )
     except Exception as e:
         logger.exception("Unexpected error in self_serve_update for code %s", code)
         return render(
             request,
             "message/message.html",
-            {"message": "An unexpected error occurred. Please try again later."}
+            {"message": "An unexpected error occurred. Please try again later."},
         )

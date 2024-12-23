@@ -11,17 +11,21 @@ from global_throttle.middleware import GlobalThrottleMiddleware
 from global_throttle.decorators import exempt_from_throttling
 from sso_user.models.user import SSOUser
 
+
 @exempt_from_throttling
 def exempt_view(request):
     return None
 
+
 def non_exempt_view(request):
     return None
+
 
 urlpatterns = [
     path("exempt/", exempt_view, name="exempt_view"),
     path("non_exempt/", non_exempt_view, name="non_exempt_view"),
 ]
+
 
 @override_settings(ROOT_URLCONF=__name__)
 class GlobalThrottleMiddlewareTestCase(TestCase):
@@ -70,7 +74,7 @@ class GlobalThrottleMiddlewareTestCase(TestCase):
     @override_settings(GLOBAL_THROTTLE_LIMIT=20)
     def test_throttle_limit_override(self):
         """Test that the throttle limit can be overridden in settings.py
-        
+
         Need to use a fresh middleware to pick up the new settings.
         """
         middleware = GlobalThrottleMiddleware(lambda request: None)
@@ -80,11 +84,11 @@ class GlobalThrottleMiddlewareTestCase(TestCase):
         for _ in range(20):
             self.assertFalse(middleware.maybe_throttle(request))
         self.assertTrue(middleware.maybe_throttle(request))
-    
+
     @override_settings(GLOBAL_THROTTLE_WINDOW=2)
     def test_throttle_window(self):
         """Test that the throttle window resets after the specified time
-        
+
         Using a much shorter throttle window than the default!
         """
         middleware = GlobalThrottleMiddleware(lambda request: None)
@@ -100,14 +104,15 @@ class GlobalThrottleMiddlewareTestCase(TestCase):
         # Reset the window
         time.sleep(2)
         self.assertFalse(middleware.maybe_throttle(request))
-        
+
+
 @override_settings(ROOT_URLCONF=__name__)
 class ExemptFromThrottlingDecoratorTestCase(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
 
     def test_exempt_view_has_exempt_attribute(self):
-        """Test that the exempt_from_throttling decorator adds an 
+        """Test that the exempt_from_throttling decorator adds an
         exempt_from_throttling attribute to the view function"""
         view_func = exempt_view
         self.assertTrue(getattr(view_func, "exempt_from_throttling", False))

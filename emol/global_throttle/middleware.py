@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.shortcuts import render
 from django.urls import resolve
 
+
 class GlobalThrottleMiddleware:
     """Global throttle middleware
 

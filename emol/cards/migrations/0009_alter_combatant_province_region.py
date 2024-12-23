@@ -5,32 +5,84 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cards', '0008_alter_updatecode_code'),
+        ("cards", "0008_alter_updatecode_code"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='combatant',
-            name='province',
-            field=cards.models.permissioned_db_fields.PermissionedCharField(default='ON', help_text='Region code (state/province)', max_length=2),
+            model_name="combatant",
+            name="province",
+            field=cards.models.permissioned_db_fields.PermissionedCharField(
+                default="ON", help_text="Region code (state/province)", max_length=2
+            ),
         ),
         migrations.CreateModel(
-            name='Region',
+            name="Region",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(help_text='Two-letter region code (e.g., ON, MI)', max_length=2)),
-                ('name', models.CharField(help_text='Full name of region (e.g., Ontario, Michigan)', max_length=100)),
-                ('country', models.CharField(choices=[('CAN', 'Canada'), ('USA', 'United States')], max_length=3)),
-                ('postal_format', models.CharField(choices=[('CAN', 'Canadian Postal Code'), ('USA', 'US ZIP Code')], help_text='Format used for postal codes in this region', max_length=3)),
-                ('is_primary', models.BooleanField(default=False, help_text='Indicates if this is a primary region for the kingdom')),
-                ('active', models.BooleanField(default=True, help_text='Indicates if this region is currently active')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "code",
+                    models.CharField(
+                        help_text="Two-letter region code (e.g., ON, MI)", max_length=2
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        help_text="Full name of region (e.g., Ontario, Michigan)",
+                        max_length=100,
+                    ),
+                ),
+                (
+                    "country",
+                    models.CharField(
+                        choices=[("CAN", "Canada"), ("USA", "United States")],
+                        max_length=3,
+                    ),
+                ),
+                (
+                    "postal_format",
+                    models.CharField(
+                        choices=[
+                            ("CAN", "Canadian Postal Code"),
+                            ("USA", "US ZIP Code"),
+                        ],
+                        help_text="Format used for postal codes in this region",
+                        max_length=3,
+                    ),
+                ),
+                (
+                    "is_primary",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Indicates if this is a primary region for the kingdom",
+                    ),
+                ),
+                (
+                    "active",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Indicates if this region is currently active",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['country', 'name'],
-                'indexes': [models.Index(fields=['code', 'country'], name='cards_regio_code_17d4ab_idx')],
-                'unique_together': {('code', 'country')},
+                "ordering": ["country", "name"],
+                "indexes": [
+                    models.Index(
+                        fields=["code", "country"], name="cards_regio_code_17d4ab_idx"
+                    )
+                ],
+                "unique_together": {("code", "country")},
             },
         ),
     ]
