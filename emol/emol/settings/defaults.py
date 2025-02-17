@@ -74,6 +74,11 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        "cards": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
     "formatters": {
         "app": {
