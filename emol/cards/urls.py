@@ -15,6 +15,7 @@ urlpatterns = [
     path("", home.index, name="index"),
     path("request-card", home.request_card, name="request-card"),
     path("update-info", home.update_info, name="update-info"),
+    path("marshal-list", home.marshal_list, name="marshal-list"),
     re_path(
         r"^self-serve-update/(?P<code>[a-zA-Z0-9-]+)$",
         self_serve_update.self_serve_update,

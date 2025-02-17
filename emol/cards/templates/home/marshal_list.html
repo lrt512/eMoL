@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    .discipline-section {
+        margin-bottom: 2rem;
+    }
+    .discipline-title {
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .marshal-list {
+        list-style: none;
+        padding-left: 0;
+    }
+    .marshal-list li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="text-center mb-4">Kingdom Marshal List</h1>
+        
+        {% for discipline in disciplines %}
+        <div class="discipline-section">
+            <h2 class="discipline-title">{{ discipline.name }}</h2>
+            {% with marshal_list=marshal_lists|get_item:discipline.id %}
+                {% if marshal_list %}
+                    <ul class="marshal-list">
+                    {% regroup marshal_list by card.combatant.sca_name as combatant_list %}
+                    {% for combatant in combatant_list %}
+                        <li>{{ combatant.grouper }} - 
+                            {% for warrant in combatant.list %}{% if not forloop.first %}, {% endif %}{{ warrant.marshal.name }}{% endfor %}
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No active marshals for this discipline.</p>
+                {% endif %}
+            {% endwith %}
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %} 

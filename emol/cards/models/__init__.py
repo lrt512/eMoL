@@ -2,6 +2,7 @@ from .authorization import Authorization
 from .card import Card
 from .combatant import Combatant
 from .combatant_authorization import CombatantAuthorization
+from .combatant_warrant import CombatantWarrant
 from .discipline import Discipline
 from .marshal import Marshal
 from .permission import Permission
