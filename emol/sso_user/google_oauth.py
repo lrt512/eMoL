@@ -1,6 +1,7 @@
-import os
-from authlib.integrations.django_client import OAuth
 import logging
+import os
+
+from authlib.integrations.django_client import OAuth
 
 logger = logging.getLogger("cards")
 

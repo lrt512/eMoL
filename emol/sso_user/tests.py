@@ -1,10 +1,10 @@
 # tests.py
-from django.test import TestCase, Client
-from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.test import Client, TestCase
+from django.urls import reverse
 
-from .models import SSOUser
 from .google_oauth import GoogleOAuth
+from .models import SSOUser
 
 
 class SSOUserModelTest(TestCase):

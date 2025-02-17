@@ -11,19 +11,16 @@ from datetime import date
 from urllib.parse import urljoin
 from uuid import uuid4
 
+from cards.mail import send_card_url, send_privacy_policy
+from cards.utility.names import generate_name
 from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
 from django.urls import reverse
 
-from cards.mail import send_card_url, send_privacy_policy
-from cards.utility.names import generate_name
-
-from .permissioned_db_fields import (
-    PermissionedCharField,
-    PermissionedDateField,
-    PermissionedIntegerField,
-)
+from .permissioned_db_fields import (PermissionedCharField,
+                                     PermissionedDateField,
+                                     PermissionedIntegerField)
 
 __all__ = ["Combatant"]
 

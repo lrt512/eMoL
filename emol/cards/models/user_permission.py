@@ -2,7 +2,6 @@ import logging
 
 from django.conf import settings
 from django.db import models
-
 from sso_user.models import SSOUser
 
 from .discipline import Discipline

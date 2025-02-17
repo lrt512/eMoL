@@ -1,7 +1,7 @@
-from functools import lru_cache
 import json
 import logging
 import os
+from functools import lru_cache
 
 import boto3
 

@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from django.shortcuts import render
-from django.views.decorators.http import require_http_methods
-
 from cards.mail import send_card_url, send_info_update, send_privacy_policy
 from cards.models import Combatant, UpdateCode
 from cards.utility.throttle import throttle
 from current_user import get_current_user
+from django.shortcuts import render
+from django.views.decorators.http import require_http_methods
 
 logger = logging.getLogger("cards")
 

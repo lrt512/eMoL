@@ -1,6 +1,7 @@
 import json
+
+from cards.models import Authorization, Discipline, Marshal
 from django.core.management.base import BaseCommand
-from cards.models import Discipline, Authorization, Marshal
 
 
 class Command(BaseCommand):

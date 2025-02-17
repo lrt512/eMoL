@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from django.contrib import admin
-
 from cards.models.user_permission import UserPermission
+from django.contrib import admin
 
 
 @admin.register(UserPermission)

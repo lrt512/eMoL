@@ -1,13 +1,12 @@
 import logging
 
+from cards.models.combatant import Combatant
+from cards.models.waiver import Waiver
 from rest_framework import serializers, status, viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
-
-from cards.models.combatant import Combatant
-from cards.models.waiver import Waiver
 
 from .permissions import WaiverDatePermission
 
@@ -39,7 +38,9 @@ class WaiverViewSet(viewsets.ModelViewSet):
             serializer = WaiverSerializer(waiver)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Waiver.DoesNotExist:
-            return Response({"detail": "No waiver found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "No waiver found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
     def update(self, request, uuid):
         serializer = self.get_serializer(data=request.data, partial=True)
