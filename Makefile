@@ -8,7 +8,6 @@ run/down:
 
 run/detached: run/prune
 	docker compose up --build -d
-	docker compose logs -f
 
 run/shell:
 	docker exec -it emol-app-1 /bin/bash
@@ -33,9 +32,13 @@ run/app-logs: ## View application logs
 	docker exec -it emol-app-1 tail -f /var/log/emol/gunicorn.log
 
 run/restart: ## Restart the application services inside container
-	docker exec -it emol-app-1 /etc/init.d/emol stop && \
-	docker exec -it emol-app-1 /etc/init.d/emol start && \
-	docker exec -it emol-app-1 service nginx restart
+	@echo "Restarting application..."
+	@docker exec emol-app-1 bash -c '\
+		echo "Stopping gunicorn..." && \
+		/etc/init.d/emol stop && \
+		echo "Starting gunicorn..." && \
+		/etc/init.d/emol start && \
+		echo "Application restarted"'
 
 run/status: ## Check status of services inside container
 	@echo "Checking nginx status..." && \
