@@ -79,7 +79,7 @@ check_dependencies() {
     done
     
     # Check for required commands
-    REQUIRED_COMMANDS="poetry nginx systemctl aws git"
+    REQUIRED_COMMANDS="poetry nginx aws git"
     for cmd in $REQUIRED_COMMANDS; do
         if ! command -v $cmd &> /dev/null; then
             echo -e "\033[1;31mRequired command '$cmd' not found - installing dependencies${RESET}"
@@ -183,13 +183,13 @@ environment_specific_setup() {
         #     echo "export $var=${!var}" >> $output_file
         # done
 
-        aws ssm put-parameter --name "/emol/django_settings_module" --value "emol.settings.dev" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/oauth_client_id" --value "mock-client-id" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/oauth_client_secret" --value "mock-client-secret" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/db_host" --value "db" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/db_name" --value "emol" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/db_user" --value "emol_db_user" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/db_password" --value "emol_db_password" --type "SecureString" --endpoint-url "http://localstack:4566"
+        aws ssm put-parameter --name "/emol/django_settings_module" --value "emol.settings.dev" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
+        aws ssm put-parameter --name "/emol/oauth_client_id" --value "mock-client-id" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
+        aws ssm put-parameter --name "/emol/oauth_client_secret" --value "mock-client-secret" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
+        aws ssm put-parameter --name "/emol/db_host" --value "db" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
+        aws ssm put-parameter --name "/emol/db_name" --value "emol" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
+        aws ssm put-parameter --name "/emol/db_user" --value "emol_db_user" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
+        aws ssm put-parameter --name "/emol/db_password" --value "emol_db_password" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
     else
         # In the real world, www-data needs to own the files    
         chown -R www-data:www-data /opt/emol
@@ -198,66 +198,18 @@ environment_specific_setup() {
 
 emol_dependencies() {
     pushd /opt/emol
+    poetry config virtualenvs.in-project true
     poetry install --only main
-    chown -R www-data:www-data /opt/emol_venv
+    chown -R www-data:www-data .venv
     popd
-}
-
-configure_nginx() {
-    echo -e "\n"
-    echo -e "Configuring nginx..."
-    rm -f /etc/nginx/sites-enabled/default
-    cp ${SOURCE_DIR}/setup_files/configs/nginx.conf /etc/nginx/sites-enabled/
-    update-rc.d nginx defaults
-}
-
-configure_emol() {
-    echo -e "\n"
-    echo -e "Configuring emol service..."
-    cp ${SOURCE_DIR}/setup_files/configs/emol /etc/init.d/
-    chmod +x /etc/init.d/emol
-    update-rc.d emol defaults
-}
-
-restart_services() {
-    echo -e "\nRestarting services..."
-    
-    # Gracefully reload nginx
-    if ! nginx -t; then
-        echo -e "\033[1;31mNginx config test failed - rolling back${RESET}"
-        rollback
-        exit 1
-    fi
-    systemctl reload nginx
-    
-    # Restart emol service
-    if ! systemctl restart emol; then
-        echo -e "\033[1;31mFailed to restart emol service - rolling back${RESET}"
-        rollback
-        exit 1
-    fi
-    
-    # Verify service is running
-    if ! systemctl is-active --quiet emol; then
-        echo -e "\033[1;31mEmol service failed to start - rolling back${RESET}"
-        rollback
-        exit 1
-    fi
-}
-
-clear_cache() {
-    echo -e "Clearing Django cache..."
-    # Activate virtual environment and clear cache
-    source /opt/emol_venv/bin/activate
-    cd /opt/emol
-    python manage.py shell -c "from django.core.cache import cache; cache.clear()"
-    deactivate
 }
 
 run_db_operations() {
     echo -e "\nRunning database operations..."
     pushd /opt/emol
-    
+    # Change directory to emol to find manage.py
+    cd emol
+
     echo "Apply migrations"
     if ! poetry run python manage.py migrate; then
         echo -e "\033[1;31mDatabase migrations failed - rolling back${RESET}"
@@ -374,12 +326,6 @@ progress $((++CURRENT_STEP)) "Installing EMOL"
 install_emol
 emol_dependencies
 environment_specific_setup
-if [ "$is_dev" = false ]; then
-    configure_nginx
-    configure_emol
-    clear_cache
-    run_db_operations
-    restart_services
-fi
+run_db_operations
 echo -e "\n"
 echo -e "${GREEN}Bootstrap complete${RESET}"

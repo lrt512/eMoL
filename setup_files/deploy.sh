@@ -4,6 +4,10 @@ GREEN='\033[1;32m'
 RED='\033[1;31m'
 RESET='\033[0m'
 
+# --- Add Repository URL variable ---
+REPO_URL="https://github.com/yourusername/emol.git"
+# ----------------------------------
+
 show_help() {
     cat << EOF
 EMOL Deployment Script
@@ -89,9 +93,15 @@ done
 TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TEMP_DIR"' EXIT
 
-# Clone repo for version checking
-git clone --quiet https://github.com/yourusername/emol.git "$TEMP_DIR"
+# --- Improved logging and error checking around git clone ---
+echo -e "\nCloning repository from ${REPO_URL} to ${TEMP_DIR}..."
+if ! git clone --quiet "$REPO_URL" "$TEMP_DIR"; then
+    echo -e "${RED}Error cloning repository from ${REPO_URL}${RESET}"
+    exit 1
+fi
 cd "$TEMP_DIR"
+echo -e "${GREEN}Repository cloned successfully.${RESET}\n"
+# ------------------------------------------------------------
 
 if [ "$CHECK_ONLY" = true ]; then
     check_for_updates
@@ -114,16 +124,29 @@ if [ "$DRY_RUN" = true ]; then
     exit 0
 fi
 
-# Checkout version and run bootstrap
-git checkout "$VERSION_TO_DEPLOY"
-if ! ./setup_files/bootstrap.sh; then
-    echo -e "${RED}Deployment failed${RESET}"
+# --- Improved logging and error checking around git checkout and bootstrap ---
+echo -e "Checking out version ${VERSION_TO_DEPLOY}..."
+if ! git checkout "$VERSION_TO_DEPLOY"; then
+    echo -e "${RED}Error checking out version ${VERSION_TO_DEPLOY}${RESET}"
     exit 1
 fi
+echo -e "${GREEN}Version ${VERSION_TO_DEPLOY} checked out successfully.${RESET}\n"
+
+echo -e "Running bootstrap script for version ${VERSION_TO_DEPLOY}..."
+START_TIME=$(date +%s)
+if ! ./setup_files/bootstrap.sh; then
+    echo -e "${RED}Deployment failed during bootstrap for version ${VERSION_TO_DEPLOY}${RESET}"
+    exit 1
+fi
+END_TIME=$(date +%s)
+DEPLOYMENT_TIME=$((END_TIME - START_TIME))
+echo -e "${GREEN}Bootstrap script completed successfully in ${DEPLOYMENT_TIME} seconds.${RESET}\n"
+# ---------------------------------------------------------------------------
 
 # Tag successful deployment
 DEPLOY_TAG="deploy-$VERSION_TO_DEPLOY-$(date +%Y%m%d-%H%M%S)"
 git tag -a "$DEPLOY_TAG" -m "Deployed $VERSION_TO_DEPLOY"
 git push origin "$DEPLOY_TAG"
 
-echo -e "${GREEN}Successfully deployed $VERSION_TO_DEPLOY${RESET}" 
+echo -e "${GREEN}Successfully deployed version $VERSION_TO_DEPLOY${RESET}"
+echo -e "${GREEN}Deployment tag pushed: ${DEPLOY_TAG}${RESET}" 
