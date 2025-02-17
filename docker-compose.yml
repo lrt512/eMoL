@@ -4,24 +4,25 @@ services:
     build: .
     ports:
       - "8000:80"
+    healthcheck:
+      test: ["CMD", "/etc/init.d/emol", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     environment:
       - EMOL_DEV=1
       - AWS_DEFAULT_REGION=ca-central-1
-      - SSM_ENDPOINT_URL=http://host.docker.internal:4566
-      - OAUTH_PROVIDER_URL=http://host.docker.internal:8080
-    entrypoint: > 
-      sh -c "
-        /opt/emol/setup_files/bootstrap.sh &&
-        /opt/emol/setup_files/db.sh &&
-        poetry run python manage.py runserver 0.0.0.0:80
-      "    
+      - SSM_ENDPOINT_URL=http://localstack:4566
+      - DJANGO_SETTINGS_MODULE=emol.settings.dev
     volumes:
       - .:/opt/emol
-      - data:/mnt/data
+      - static:/opt/emol/static
+      - emol_logs:/var/log/emol
+      - nginx_logs:/var/log/nginx
+      - nginx_run:/run/nginx
     depends_on:
       - db
       - localstack
-      - oauth-mock
     networks:
       - emol-network
 
@@ -35,7 +36,6 @@ services:
       - AWS_DEFAULT_REGION=ca-central-1
     ports:
       - "4566:4566"
-      - "4510-4559:4510-4559"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
@@ -53,17 +53,13 @@ services:
     networks:
       - emol-network
 
-  oauth-mock:
-    image: ghcr.io/navikt/mock-oauth2-server:2.1.1
-    ports:
-      - "8080:8080"
-    networks:
-      - emol-network
-
 networks:
   emol-network:
     driver: bridge
 
 volumes:
-  data:
   mysql_data:
+  static:
+  emol_logs:
+  nginx_logs:
+  nginx_run:

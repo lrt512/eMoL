@@ -1,14 +1,13 @@
 import time
-from django.contrib.auth.models import AnonymousUser
-from django.test import TestCase, RequestFactory
-from django.core.cache import cache
-from django.urls import path
-from django.conf import settings
-from django.test.utils import override_settings
-from django.urls import reverse
 
-from global_throttle.middleware import GlobalThrottleMiddleware
+from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
+from django.core.cache import cache
+from django.test import RequestFactory, TestCase
+from django.test.utils import override_settings
+from django.urls import path, reverse
 from global_throttle.decorators import exempt_from_throttling
+from global_throttle.middleware import GlobalThrottleMiddleware
 from sso_user.models.user import SSOUser
 
 

@@ -4,6 +4,14 @@ GREEN='\033[1;32m'
 RED='\033[1;31m'
 RESET='\033[0m'
 
+# --- Add Repository URL variable ---
+REPO_URL="https://github.com/yourusername/emol.git"
+BACKUP_DIR="/opt/emol_backup"
+# ----------------------------------
+
+MAINTENANCE_PAGE="/opt/emol/maintenance.html"
+DEPLOY_LOG="/var/log/emol/deployments.log"
+
 show_help() {
     cat << EOF
 EMOL Deployment Script
@@ -55,6 +63,133 @@ check_for_updates() {
     fi
 }
 
+pre_deploy_checks() {
+    echo "Running pre-deployment checks..."
+    
+    # Check disk space
+    FREE_SPACE=$(df -m /opt | awk 'NR==2 {print $4}')
+    if [ "$FREE_SPACE" -lt 2048 ]; then # 2GB minimum
+        echo -e "${RED}Insufficient disk space for deployment${RESET}"
+        exit 1
+    }
+
+    # Check current application status
+    if ! /etc/init.d/emol status > /dev/null; then
+        echo -e "${RED}Warning: Application is not running${RESET}"
+        read -p "Continue deployment? [y/N] " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            exit 1
+        fi
+    }
+}
+
+backup_current() {
+    echo "Creating backup..."
+    BACKUP_NAME="emol_backup_$(date +%Y%m%d_%H%M%S)"
+    BACKUP_PATH="$BACKUP_DIR/$BACKUP_NAME"
+    
+    mkdir -p "$BACKUP_DIR"
+    # Keep only last 5 backups
+    ls -t "$BACKUP_DIR" | tail -n +6 | xargs -I {} rm -rf "$BACKUP_DIR/{}"
+    
+    if ! cp -r /opt/emol "$BACKUP_PATH"; then
+        echo -e "${RED}Backup failed${RESET}"
+        exit 1
+    fi
+    echo -e "${GREEN}Backup created at $BACKUP_PATH${RESET}"
+}
+
+rollback() {
+    echo "Rolling back changes..."
+    latest_backup=$(ls -t /opt/emol_backup/configs_* | head -1)
+    if [ -n "$latest_backup" ]; then
+        cp $latest_backup/nginx.conf /etc/nginx/
+        cp $latest_backup/emol /etc/init.d/
+        service nginx restart
+        /etc/init.d/emol restart
+    fi
+}
+
+enable_maintenance() {
+    # Simple maintenance page
+    cat > "$MAINTENANCE_PAGE" << 'EOF'
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>eMoL System Maintenance</h1>
+    <p>The system is currently being updated. Please check back in 5 minutes.</p>
+</body>
+</html>
+EOF
+
+    # Update nginx to serve maintenance page
+    sed -i 's|proxy_pass http://unix:${SOCKET_PATH};|return 503;|' /etc/nginx/sites-enabled/emol.conf
+    sed -i '/return 503;/a\        error_page 503 /maintenance.html;\n        location = /maintenance.html {\n            root /opt/emol;\n        }' /etc/nginx/sites-enabled/emol.conf
+    
+    service nginx reload
+}
+
+disable_maintenance() {
+    # Restore normal nginx config
+    sed -i 's|return 503;|proxy_pass http://unix:${SOCKET_PATH};|' /etc/nginx/sites-enabled/emol.conf
+    sed -i '/error_page 503/,+4d' /etc/nginx/sites-enabled/emol.conf
+    rm -f "$MAINTENANCE_PAGE"
+    
+    service nginx reload
+}
+
+log_deployment() {
+    local status=$1
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $VERSION_TO_DEPLOY - $status" >> "$DEPLOY_LOG"
+}
+
+deploy() {
+    echo "Starting deployment..."
+    log_deployment "started"
+    
+    enable_maintenance
+    # Graceful stop
+    /etc/init.d/emol stop
+    
+    # Deploy new version
+    if ! ./setup_files/bootstrap.sh; then
+        rollback
+        disable_maintenance
+        log_deployment "failed - rolled back"
+        exit 1
+    fi
+    
+    # Restart services
+    if ! /etc/init.d/emol start || ! service nginx restart; then
+        rollback
+        disable_maintenance
+        log_deployment "failed - rolled back"
+        exit 1
+    fi
+    
+    disable_maintenance
+    log_deployment "completed"
+}
+
+check_configs() {
+    echo "Checking nginx configuration..."
+    nginx -t || exit 1
+    
+    echo "Checking gunicorn configuration..."
+    cd /opt/emol/emol
+    poetry run gunicorn --check-config emol.wsgi:application || exit 1
+}
+
+backup_configs() {
+    echo "Backing up configurations..."
+    timestamp=$(date +%Y%m%d_%H%M%S)
+    mkdir -p /opt/emol_backup/configs_$timestamp
+    cp /etc/nginx/nginx.conf /opt/emol_backup/configs_$timestamp/
+    cp /etc/nginx/sites-enabled/* /opt/emol_backup/configs_$timestamp/
+    cp /etc/init.d/emol /opt/emol_backup/configs_$timestamp/
+}
+
 # Parse arguments
 DRY_RUN=false
 CHECK_ONLY=false
@@ -89,14 +224,26 @@ done
 TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TEMP_DIR"' EXIT
 
-# Clone repo for version checking
-git clone --quiet https://github.com/yourusername/emol.git "$TEMP_DIR"
+echo -e "\nCloning repository from ${REPO_URL} to ${TEMP_DIR}..."
+if ! git clone --quiet "$REPO_URL" "$TEMP_DIR"; then
+    echo -e "${RED}Error cloning repository from ${REPO_URL}${RESET}"
+    exit 1
+fi
 cd "$TEMP_DIR"
 
 if [ "$CHECK_ONLY" = true ]; then
     check_for_updates
     exit 0
 fi
+
+# Run pre-deployment checks
+pre_deploy_checks
+
+# Create backup
+backup_current
+
+# Add to main sequence before any changes
+backup_configs
 
 if [ -n "$FORCE_VERSION" ]; then
     VERSION_TO_DEPLOY=$FORCE_VERSION
@@ -114,16 +261,19 @@ if [ "$DRY_RUN" = true ]; then
     exit 0
 fi
 
-# Checkout version and run bootstrap
-git checkout "$VERSION_TO_DEPLOY"
-if ! ./setup_files/bootstrap.sh; then
-    echo -e "${RED}Deployment failed${RESET}"
-    exit 1
-fi
+# Add to main sequence before service restart
+check_configs
+
+# Perform deployment
+deploy
 
 # Tag successful deployment
 DEPLOY_TAG="deploy-$VERSION_TO_DEPLOY-$(date +%Y%m%d-%H%M%S)"
 git tag -a "$DEPLOY_TAG" -m "Deployed $VERSION_TO_DEPLOY"
 git push origin "$DEPLOY_TAG"
 
-echo -e "${GREEN}Successfully deployed $VERSION_TO_DEPLOY${RESET}" 
+echo -e "${GREEN}Successfully deployed version $VERSION_TO_DEPLOY${RESET}"
+echo -e "${GREEN}Deployment tag pushed: ${DEPLOY_TAG}${RESET}"
+
+# Add trap
+trap rollback ERR 

@@ -18,10 +18,11 @@ case "$1" in
     cd $ROOT
     poetry run gunicorn \
         --pid $PID \
-        --workers 3 \
+        --workers 2 \
         --bind unix:/opt/emol/emol.sock \
         --access-logfile - \
         --daemon \
+        --reload \
         emol.wsgi:application
     ;;
   stop)

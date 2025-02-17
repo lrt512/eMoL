@@ -1,9 +1,8 @@
 import math
 
+from cards.models.authorization import Authorization
 from django import template
 from django.utils.safestring import mark_safe
-
-from cards.models.authorization import Authorization
 
 register = template.Library()
 

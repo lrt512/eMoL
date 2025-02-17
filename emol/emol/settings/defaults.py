@@ -67,19 +67,18 @@ LOGGING = {
             "formatter": "app",
         },
     },
-    "root": {"level": "DEBUG", "handlers": ["console"]},
+    "root": {"level": "INFO", "handlers": ["console"]},
     "loggers": {
         "": {
             "handlers": ["console"],
-            "level": "DEBUG",
+            "level": "INFO",
             "propagate": False,
         },
     },
     "formatters": {
         "app": {
-            "format": (),
-            "%(asctime)s [%(levelname)-8s] "
-            "(%(module)s.%(funcName)s) %(message)s"
+            "format": "%(asctime)s [%(levelname)-8s] "
+            "(%(module)s.%(funcName)s) %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
     },

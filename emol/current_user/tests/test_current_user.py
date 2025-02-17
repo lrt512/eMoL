@@ -1,9 +1,8 @@
-from django.contrib.auth.models import AnonymousUser
-from django.test import RequestFactory, TestCase
-from django.http import HttpResponse
-
-from sso_user.models.user import SSOUser
 from current_user.middleware import ThreadLocalUserMiddleware, get_current_user
+from django.contrib.auth.models import AnonymousUser
+from django.http import HttpResponse
+from django.test import RequestFactory, TestCase
+from sso_user.models.user import SSOUser
 
 
 def view_function(request):

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from django.contrib import admin
-
 from cards.models.marshal import Marshal
+from django.contrib import admin
 
 __all__ = ["MarshalAdmin"]
 

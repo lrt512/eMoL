@@ -1,5 +1,5 @@
-from django.contrib import admin
 from cards.models.region import Region
+from django.contrib import admin
 
 
 @admin.register(Region)

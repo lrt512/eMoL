@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from django.contrib import admin
-
 from cards.models.discipline import Discipline
+from django.contrib import admin
 
 
 @admin.register(Discipline)

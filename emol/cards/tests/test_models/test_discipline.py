@@ -1,7 +1,6 @@
+from cards.models.discipline import Discipline
 from django.test import TestCase
 from django.utils.text import slugify
-
-from cards.models.discipline import Discipline
 
 
 class DisciplineTestCase(TestCase):

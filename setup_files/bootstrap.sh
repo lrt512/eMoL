@@ -68,6 +68,30 @@ system_dependencies() {
 check_dependencies() {
     echo -e "Checking dependencies..."
     
+    # Source asdf if available
+    if [ -f "${ASDF_DIR}/asdf.sh" ]; then
+        source ${ASDF_DIR}/asdf.sh
+    fi
+    
+    # Check Python version
+    PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
+
+    # Convert version strings to comparable numbers
+    version_to_number() {
+        echo "$1" | awk -F. '{ printf("%d%03d\n", $1, $2) }'
+    }
+
+    MIN_VERSION="3.8"
+    CURRENT_VERSION_NUM=$(version_to_number "$PYTHON_VERSION")
+    MIN_VERSION_NUM=$(version_to_number "$MIN_VERSION")
+
+    if [ "$CURRENT_VERSION_NUM" -ge "$MIN_VERSION_NUM" ]; then
+        echo -e "${GREEN}Python version check passed: found $PYTHON_VERSION${RESET}"
+    else
+        echo -e "${RED}Python 3.8 or higher required, found $PYTHON_VERSION${RESET}"
+        exit 1
+    fi
+
     # Check for required system packages
     REQUIRED_PACKAGES="nginx certbot python3-venv python3-pip python3-dev libmysqlclient-dev"
     for pkg in $REQUIRED_PACKAGES; do
@@ -79,7 +103,7 @@ check_dependencies() {
     done
     
     # Check for required commands
-    REQUIRED_COMMANDS="poetry nginx systemctl aws git"
+    REQUIRED_COMMANDS="poetry nginx aws git"
     for cmd in $REQUIRED_COMMANDS; do
         if ! command -v $cmd &> /dev/null; then
             echo -e "\033[1;31mRequired command '$cmd' not found - installing dependencies${RESET}"
@@ -88,12 +112,7 @@ check_dependencies() {
         fi
     done
     
-    # Check Python version
-    PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
-    if (( $(echo "$PYTHON_VERSION < 3.8" | bc -l) )); then
-        echo -e "\033[1;31mPython 3.8 or higher required, found $PYTHON_VERSION${RESET}"
-        exit 1
-    fi
+    echo -e "${GREEN}All dependencies satisfied${RESET}"
 }
 
 check_disk_space() {
@@ -174,22 +193,16 @@ cleanup_build() {
 
 environment_specific_setup() {
     if [ "$is_dev" = true ]; then
-        # We'll also need to create a .env_dev file so we can get the
-        # environment variables for the dev environment in the init script
-        # output_file="/opt/emol/.env_dev"
-        # env_vars="DJANGO_SETTINGS_MODULE DB_HOST DB_NAME DB_USER DB_PASSWORD"
-        # echo "" > $output_file
-        # for var in $env_vars; do
-        #     echo "export $var=${!var}" >> $output_file
-        # done
-
-        aws ssm put-parameter --name "/emol/django_settings_module" --value "emol.settings.dev" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/oauth_client_id" --value "mock-client-id" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/oauth_client_secret" --value "mock-client-secret" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/db_host" --value "db" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/db_name" --value "emol" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/db_user" --value "emol_db_user" --type "SecureString" --endpoint-url "http://localstack:4566"
-        aws ssm put-parameter --name "/emol/db_password" --value "emol_db_password" --type "SecureString" --endpoint-url "http://localstack:4566"
+        echo "Setting up development environment..."
+        
+        # Set up AWS SSM parameters for development
+        aws ssm put-parameter --name "/emol/django_settings_module" --value "emol.settings.dev" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
+        aws ssm put-parameter --name "/emol/oauth_client_id" --value "mock-client-id" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
+        aws ssm put-parameter --name "/emol/oauth_client_secret" --value "mock-client-secret" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
+        aws ssm put-parameter --name "/emol/db_host" --value "db" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
+        aws ssm put-parameter --name "/emol/db_name" --value "emol" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
+        aws ssm put-parameter --name "/emol/db_user" --value "emol_db_user" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
+        aws ssm put-parameter --name "/emol/db_password" --value "emol_db_password" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
     else
         # In the real world, www-data needs to own the files    
         chown -R www-data:www-data /opt/emol
@@ -198,66 +211,18 @@ environment_specific_setup() {
 
 emol_dependencies() {
     pushd /opt/emol
+    poetry config virtualenvs.in-project true
     poetry install --only main
-    chown -R www-data:www-data /opt/emol_venv
+    chown -R www-data:www-data .venv
     popd
-}
-
-configure_nginx() {
-    echo -e "\n"
-    echo -e "Configuring nginx..."
-    rm -f /etc/nginx/sites-enabled/default
-    cp ${SOURCE_DIR}/setup_files/configs/nginx.conf /etc/nginx/sites-enabled/
-    update-rc.d nginx defaults
-}
-
-configure_emol() {
-    echo -e "\n"
-    echo -e "Configuring emol service..."
-    cp ${SOURCE_DIR}/setup_files/configs/emol /etc/init.d/
-    chmod +x /etc/init.d/emol
-    update-rc.d emol defaults
-}
-
-restart_services() {
-    echo -e "\nRestarting services..."
-    
-    # Gracefully reload nginx
-    if ! nginx -t; then
-        echo -e "\033[1;31mNginx config test failed - rolling back${RESET}"
-        rollback
-        exit 1
-    fi
-    systemctl reload nginx
-    
-    # Restart emol service
-    if ! systemctl restart emol; then
-        echo -e "\033[1;31mFailed to restart emol service - rolling back${RESET}"
-        rollback
-        exit 1
-    fi
-    
-    # Verify service is running
-    if ! systemctl is-active --quiet emol; then
-        echo -e "\033[1;31mEmol service failed to start - rolling back${RESET}"
-        rollback
-        exit 1
-    fi
-}
-
-clear_cache() {
-    echo -e "Clearing Django cache..."
-    # Activate virtual environment and clear cache
-    source /opt/emol_venv/bin/activate
-    cd /opt/emol
-    python manage.py shell -c "from django.core.cache import cache; cache.clear()"
-    deactivate
 }
 
 run_db_operations() {
     echo -e "\nRunning database operations..."
     pushd /opt/emol
-    
+    # Change directory to emol to find manage.py
+    cd emol
+
     echo "Apply migrations"
     if ! poetry run python manage.py migrate; then
         echo -e "\033[1;31mDatabase migrations failed - rolling back${RESET}"
@@ -374,12 +339,160 @@ progress $((++CURRENT_STEP)) "Installing EMOL"
 install_emol
 emol_dependencies
 environment_specific_setup
-if [ "$is_dev" = false ]; then
-    configure_nginx
-    configure_emol
-    clear_cache
-    run_db_operations
-    restart_services
-fi
+run_db_operations
 echo -e "\n"
 echo -e "${GREEN}Bootstrap complete${RESET}"
+
+# Service configuration functions
+configure_nginx() {
+    echo -e "\nConfiguring nginx..."
+    
+    # Ensure nginx pid directory exists and has correct permissions
+    mkdir -p /run/nginx
+    chown -R www-data:www-data /run/nginx
+    
+    # Configure main nginx.conf
+    cat > /etc/nginx/nginx.conf << 'EOF'
+user www-data;
+worker_processes auto;
+pid /run/nginx/nginx.pid;
+include /etc/nginx/modules-enabled/*.conf;
+
+events {
+    worker_connections 768;
+}
+
+http {
+    sendfile on;
+    tcp_nopush on;
+    types_hash_max_size 2048;
+    
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+
+    access_log /var/log/nginx/access.log combined buffer=512k flush=1m;
+    error_log /var/log/nginx/error.log warn;
+
+    gzip on;
+
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+}
+EOF
+
+    # Set up environment variables for templates
+    export NGINX_LOG_PATH="/var/log/nginx"
+    export STATIC_ROOT="/opt/emol/static"
+    export SOCKET_PATH="/opt/emol/emol.sock"
+    
+    local template_file
+    if [ "$is_dev" = true ]; then
+        template_file="/opt/emol/setup_files/configs/nginx.dev.conf"
+    else
+        template_file="/opt/emol/setup_files/configs/nginx.prod.conf"
+    fi
+
+    # Process template and ensure sites-enabled directory exists
+    mkdir -p /etc/nginx/sites-enabled
+    envsubst < "$template_file" > /etc/nginx/sites-enabled/emol.conf
+    
+    # Also set up proxy params
+    cp /opt/emol/setup_files/configs/proxy_params /etc/nginx/proxy_params
+
+    # Ensure log directory exists with proper permissions
+    mkdir -p /var/log/nginx
+    chown -R www-data:www-data /var/log/nginx
+
+    # Test configuration
+    if ! nginx -t; then
+        echo -e "\033[1;31mNginx configuration test failed${RESET}"
+        exit 1
+    fi
+}
+
+configure_gunicorn() {
+    echo -e "\nConfiguring gunicorn..."
+    cat > /etc/init.d/emol << 'EOF'
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          gunicorn
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start Gunicorn at boot
+# Description:       Enable Gunicorn service.
+### END INIT INFO
+
+ROOT=/opt/emol/emol
+PID=/var/run/emol.pid
+
+case "$1" in
+  start)
+    echo "Starting eMoL"
+    cd $ROOT
+    poetry run gunicorn \
+        --pid $PID \
+        --workers 3 \
+        --bind unix:/opt/emol/emol.sock \
+        --access-logfile /var/log/emol/gunicorn.log \
+        --error-logfile /var/log/emol/gunicorn.error.log \
+        --daemon \
+        emol.wsgi:application
+    ;;
+  stop)
+    echo "Stopping Gunicorn"
+    if [ -f $PID ]; then
+        kill -9 $(cat $PID)
+        rm -f $PID
+    fi
+    ;;
+  status)
+    if [ -f $PID ]; then
+      echo "emol (gunicorn) is running with pid: $(cat $PID)"
+    else
+      echo "emol (gunicorn) is not running"
+    fi
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: /etc/init.d/emol {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0
+EOF
+
+    chmod +x /etc/init.d/emol
+}
+
+setup_services() {
+    echo -e "\nSetting up services..."
+    configure_gunicorn
+    configure_nginx
+}
+
+# In the main sequence
+progress $((++CURRENT_STEP)) "Setting up services"
+setup_services
+
+configure_settings() {
+    echo -e "\nConfiguring settings..."
+    
+    # Ensure we're using dev.py in development
+    if [ "$is_dev" = true ]; then
+        echo "Using development settings (dev.py)"
+        export DJANGO_SETTINGS_MODULE=emol.settings.dev
+    fi
+}
+
+# Add to the main sequence
+progress $((++CURRENT_STEP)) "Configuring settings"
+configure_settings
