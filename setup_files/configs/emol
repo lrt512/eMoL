@@ -18,33 +18,22 @@ case "$1" in
     cd $ROOT
     poetry run gunicorn \
         --pid $PID \
-        --workers 3 \
+        --workers 2 \
         --bind unix:/opt/emol/emol.sock \
         --access-logfile - \
         --daemon \
+        --reload \
         emol.wsgi:application
     ;;
   stop)
     echo "Stopping Gunicorn"
-    PID_TO_KILL=$(cat $PID)
-    if [ -n "$PID_TO_KILL" ]; then
-        kill -15 $PID_TO_KILL # Send SIGTERM first
-        sleep 5 # Wait for graceful shutdown (adjust timeout as needed)
-        if kill -0 $PID_TO_KILL 2>/dev/null; then # Check if process is still running
-            kill -9 $PID_TO_KILL # Forcefully kill if still running
-        fi
-    fi
+    kill -9 $(cat $PID)
     ;;
   status)
     if [ -f $PID ]; then
-      PID_STATUS=$(cat $PID)
-      if kill -0 "$PID_STATUS" 2>/dev/null; then # Check if process is running
-          echo "emol (gunicorn) is running with pid: $PID_STATUS"
-      else
-          echo "emol (gunicorn) is not running (PID file exists but process is not running)"
-      fi
+      echo "emol (gunicorn) is running with pid: $(cat $PID)"
     else
-      echo "emol (gunicorn) is not running (PID file not found)"
+      echo "emol (gunicorn) is not running"
     fi
     ;;
   restart)

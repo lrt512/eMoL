@@ -6,7 +6,11 @@ RESET='\033[0m'
 
 # --- Add Repository URL variable ---
 REPO_URL="https://github.com/yourusername/emol.git"
+BACKUP_DIR="/opt/emol_backup"
 # ----------------------------------
+
+MAINTENANCE_PAGE="/opt/emol/maintenance.html"
+DEPLOY_LOG="/var/log/emol/deployments.log"
 
 show_help() {
     cat << EOF
@@ -59,6 +63,117 @@ check_for_updates() {
     fi
 }
 
+pre_deploy_checks() {
+    echo "Running pre-deployment checks..."
+    
+    # Check disk space
+    FREE_SPACE=$(df -m /opt | awk 'NR==2 {print $4}')
+    if [ "$FREE_SPACE" -lt 2048 ]; then # 2GB minimum
+        echo -e "${RED}Insufficient disk space for deployment${RESET}"
+        exit 1
+    }
+
+    # Check current application status
+    if ! /etc/init.d/emol status > /dev/null; then
+        echo -e "${RED}Warning: Application is not running${RESET}"
+        read -p "Continue deployment? [y/N] " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            exit 1
+        fi
+    }
+}
+
+backup_current() {
+    echo "Creating backup..."
+    BACKUP_NAME="emol_backup_$(date +%Y%m%d_%H%M%S)"
+    BACKUP_PATH="$BACKUP_DIR/$BACKUP_NAME"
+    
+    mkdir -p "$BACKUP_DIR"
+    # Keep only last 5 backups
+    ls -t "$BACKUP_DIR" | tail -n +6 | xargs -I {} rm -rf "$BACKUP_DIR/{}"
+    
+    if ! cp -r /opt/emol "$BACKUP_PATH"; then
+        echo -e "${RED}Backup failed${RESET}"
+        exit 1
+    fi
+    echo -e "${GREEN}Backup created at $BACKUP_PATH${RESET}"
+}
+
+rollback() {
+    echo -e "${RED}Deployment failed - rolling back...${RESET}"
+    if [ -d "$BACKUP_PATH" ]; then
+        rm -rf /opt/emol
+        cp -r "$BACKUP_PATH" /opt/emol
+        /etc/init.d/emol restart
+        service nginx restart
+        echo -e "${GREEN}Rollback complete${RESET}"
+    else
+        echo -e "${RED}No backup found for rollback${RESET}"
+    fi
+}
+
+enable_maintenance() {
+    # Simple maintenance page
+    cat > "$MAINTENANCE_PAGE" << 'EOF'
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>eMoL System Maintenance</h1>
+    <p>The system is currently being updated. Please check back in 5 minutes.</p>
+</body>
+</html>
+EOF
+
+    # Update nginx to serve maintenance page
+    sed -i 's|proxy_pass http://unix:${SOCKET_PATH};|return 503;|' /etc/nginx/sites-enabled/emol.conf
+    sed -i '/return 503;/a\        error_page 503 /maintenance.html;\n        location = /maintenance.html {\n            root /opt/emol;\n        }' /etc/nginx/sites-enabled/emol.conf
+    
+    service nginx reload
+}
+
+disable_maintenance() {
+    # Restore normal nginx config
+    sed -i 's|return 503;|proxy_pass http://unix:${SOCKET_PATH};|' /etc/nginx/sites-enabled/emol.conf
+    sed -i '/error_page 503/,+4d' /etc/nginx/sites-enabled/emol.conf
+    rm -f "$MAINTENANCE_PAGE"
+    
+    service nginx reload
+}
+
+log_deployment() {
+    local status=$1
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $VERSION_TO_DEPLOY - $status" >> "$DEPLOY_LOG"
+}
+
+deploy() {
+    echo "Starting deployment..."
+    log_deployment "started"
+    
+    enable_maintenance
+    # Graceful stop
+    /etc/init.d/emol stop
+    
+    # Deploy new version
+    if ! ./setup_files/bootstrap.sh; then
+        rollback
+        disable_maintenance
+        log_deployment "failed - rolled back"
+        exit 1
+    fi
+    
+    # Restart services
+    if ! /etc/init.d/emol start || ! service nginx restart; then
+        rollback
+        disable_maintenance
+        log_deployment "failed - rolled back"
+        exit 1
+    fi
+    
+    disable_maintenance
+    log_deployment "completed"
+}
+
 # Parse arguments
 DRY_RUN=false
 CHECK_ONLY=false
@@ -93,20 +208,23 @@ done
 TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TEMP_DIR"' EXIT
 
-# --- Improved logging and error checking around git clone ---
 echo -e "\nCloning repository from ${REPO_URL} to ${TEMP_DIR}..."
 if ! git clone --quiet "$REPO_URL" "$TEMP_DIR"; then
     echo -e "${RED}Error cloning repository from ${REPO_URL}${RESET}"
     exit 1
 fi
 cd "$TEMP_DIR"
-echo -e "${GREEN}Repository cloned successfully.${RESET}\n"
-# ------------------------------------------------------------
 
 if [ "$CHECK_ONLY" = true ]; then
     check_for_updates
     exit 0
 fi
+
+# Run pre-deployment checks
+pre_deploy_checks
+
+# Create backup
+backup_current
 
 if [ -n "$FORCE_VERSION" ]; then
     VERSION_TO_DEPLOY=$FORCE_VERSION
@@ -124,24 +242,8 @@ if [ "$DRY_RUN" = true ]; then
     exit 0
 fi
 
-# --- Improved logging and error checking around git checkout and bootstrap ---
-echo -e "Checking out version ${VERSION_TO_DEPLOY}..."
-if ! git checkout "$VERSION_TO_DEPLOY"; then
-    echo -e "${RED}Error checking out version ${VERSION_TO_DEPLOY}${RESET}"
-    exit 1
-fi
-echo -e "${GREEN}Version ${VERSION_TO_DEPLOY} checked out successfully.${RESET}\n"
-
-echo -e "Running bootstrap script for version ${VERSION_TO_DEPLOY}..."
-START_TIME=$(date +%s)
-if ! ./setup_files/bootstrap.sh; then
-    echo -e "${RED}Deployment failed during bootstrap for version ${VERSION_TO_DEPLOY}${RESET}"
-    exit 1
-fi
-END_TIME=$(date +%s)
-DEPLOYMENT_TIME=$((END_TIME - START_TIME))
-echo -e "${GREEN}Bootstrap script completed successfully in ${DEPLOYMENT_TIME} seconds.${RESET}\n"
-# ---------------------------------------------------------------------------
+# Perform deployment
+deploy
 
 # Tag successful deployment
 DEPLOY_TAG="deploy-$VERSION_TO_DEPLOY-$(date +%Y%m%d-%H%M%S)"

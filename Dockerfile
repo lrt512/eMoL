@@ -1,6 +1,5 @@
 FROM ubuntu:22.04
 
-# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DEBIAN_FRONTEND=noninteractive \
@@ -8,36 +7,59 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     POETRY_VERSION=1.7.1 \
     POETRY_HOME="/opt/poetry" \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
-    POETRY_NO_INTERACTION=1
+    POETRY_NO_INTERACTION=1 \
+    ASDF_DIR=/opt/asdf \
+    ASDF_DATA_DIR=/opt/asdf
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
-    awscli \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 python3-pip python3-venv \
     nginx \
+    awscli \
     certbot \
     python3-certbot-nginx \
     git \
-    python3-venv \
-    python3-pip \
     build-essential \
     pkg-config \
     python3-dev \
     libmysqlclient-dev \
     curl \
+    systemd \
+    unzip \
+    gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry - fixed installation and PATH
-RUN curl -sSL https://install.python-poetry.org | python3 - && \
+# Copy .tool-versions first to read Python version
+COPY .tool-versions /opt/emol/
+
+# Install asdf
+RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} --branch v0.13.1 && \
+    echo '. ${ASDF_DIR}/asdf.sh' >> ~/.bashrc && \
+    echo '. ${ASDF_DIR}/completions/asdf.bash' >> ~/.bashrc
+
+# Source asdf in current shell
+SHELL ["/bin/bash", "-c"]
+RUN source ${ASDF_DIR}/asdf.sh && \
+    # Add Python plugin
+    asdf plugin add python && \
+    # Read and install Python version from .tool-versions
+    PYTHON_VERSION=$(grep "^python" /opt/emol/.tool-versions | cut -d' ' -f2) && \
+    asdf install python ${PYTHON_VERSION} && \
+    asdf global python ${PYTHON_VERSION}
+
+# Install poetry
+RUN source ${ASDF_DIR}/asdf.sh && \
+    curl -sSL https://install.python-poetry.org | python3 - && \
     ln -s /opt/poetry/bin/poetry /usr/local/bin/poetry
 
-# Create application directory
+# Create directory structure
 RUN mkdir -p /opt/emol/emol
 
-# Copy setup files
+# Copy setup files first
 COPY setup_files /opt/emol/setup_files
 RUN chmod +x /opt/emol/setup_files/*.sh
 
-# Configure AWS CLI for LocalStack
+# Setup AWS credentials for local development
 RUN mkdir -p ~/.aws && \
     echo "[default]\n\
 aws_access_key_id = test\n\
@@ -48,30 +70,30 @@ output = json" > ~/.aws/credentials && \
 region = ca-central-1\n\
 output = json" > ~/.aws/config
 
-# Copy application files
+# Copy application code
 COPY . /opt/emol/
 WORKDIR /opt/emol/emol
 
-# Set up nginx
-RUN rm -f /etc/nginx/sites-enabled/default && \
-    cp /opt/emol/setup_files/configs/nginx.conf /etc/nginx/sites-enabled/
+# Configure nginx
+RUN rm -f /etc/nginx/sites-enabled/default
 
-# Set up emol service
-RUN cp /opt/emol/setup_files/configs/emol /etc/init.d/ && \
-    chmod +x /etc/init.d/emol
+# Create required directories with proper permissions
+RUN mkdir -p /var/log/emol && \
+    chown -R www-data:www-data /var/log/emol && \
+    mkdir -p /var/run/emol && \
+    chown -R www-data:www-data /var/run/emol && \
+    mkdir -p /etc/nginx/sites-enabled && \
+    mkdir -p /etc/init.d
 
-# Install dependencies and set up environment
+# Install Python dependencies
 RUN cd /opt/emol && \
     poetry install --only main && \
     chown -R www-data:www-data /opt/emol
 
 EXPOSE 80
 
-# Start services
-CMD service nginx start && \
-    cd /opt/emol && \
-    poetry run python manage.py migrate && \
-    poetry run python manage.py collectstatic --noinput && \
-    poetry run python manage.py createcachetable && \
-    /etc/init.d/emol start && \
-    tail -f /var/log/nginx/error.log
+# Use a custom entrypoint script
+COPY setup_files/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
