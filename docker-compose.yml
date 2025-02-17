@@ -13,6 +13,7 @@ services:
       - EMOL_DEV=1
       - AWS_DEFAULT_REGION=ca-central-1
       - SSM_ENDPOINT_URL=http://localstack:4566
+      - DJANGO_SETTINGS_MODULE=emol.settings.dev
     volumes:
       - .:/opt/emol
       - static:/opt/emol/static

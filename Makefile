@@ -1,4 +1,4 @@
-.PHONY: run/up run/down run/detached run/shell run/manage run/logs run/prune help install test check lint pylint types format migrate run/bootstrap-test
+.PHONY: run/up run/down run/detached run/shell run/manage run/logs run/prune help install test check lint pylint types format migrate run/bootstrap-test run/cycle
 
 run/up: # run/prune
 	docker compose up --build
@@ -120,4 +120,16 @@ run/db-dump: ## Dump the database to a file
 
 run/db-restore: ## Restore database from a dump file
 	@read -p "Enter dump file path: " dumpfile && \
-	docker exec -i emol-db-1 mysql -u emol_db_user -pemol_db_password emol < $$dumpfile 
+	docker exec -i emol-db-1 mysql -u emol_db_user -pemol_db_password emol < $$dumpfile
+
+run/cycle: ## Restart just the app container
+	@echo "Cycling app container..."
+	docker compose stop app
+	docker compose rm -f app
+	docker compose up -d --build app
+	@echo "Waiting for services to start..."
+	@sleep 10  # Increase sleep time to allow for full startup
+	@echo "Checking container logs..."
+	@docker compose logs --tail=50 app
+	@echo "\nChecking service status..."
+	@make run/status || true  # Don't fail if status check fails 

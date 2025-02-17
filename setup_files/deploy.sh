@@ -101,15 +101,13 @@ backup_current() {
 }
 
 rollback() {
-    echo -e "${RED}Deployment failed - rolling back...${RESET}"
-    if [ -d "$BACKUP_PATH" ]; then
-        rm -rf /opt/emol
-        cp -r "$BACKUP_PATH" /opt/emol
-        /etc/init.d/emol restart
+    echo "Rolling back changes..."
+    latest_backup=$(ls -t /opt/emol_backup/configs_* | head -1)
+    if [ -n "$latest_backup" ]; then
+        cp $latest_backup/nginx.conf /etc/nginx/
+        cp $latest_backup/emol /etc/init.d/
         service nginx restart
-        echo -e "${GREEN}Rollback complete${RESET}"
-    else
-        echo -e "${RED}No backup found for rollback${RESET}"
+        /etc/init.d/emol restart
     fi
 }
 
@@ -174,6 +172,24 @@ deploy() {
     log_deployment "completed"
 }
 
+check_configs() {
+    echo "Checking nginx configuration..."
+    nginx -t || exit 1
+    
+    echo "Checking gunicorn configuration..."
+    cd /opt/emol/emol
+    poetry run gunicorn --check-config emol.wsgi:application || exit 1
+}
+
+backup_configs() {
+    echo "Backing up configurations..."
+    timestamp=$(date +%Y%m%d_%H%M%S)
+    mkdir -p /opt/emol_backup/configs_$timestamp
+    cp /etc/nginx/nginx.conf /opt/emol_backup/configs_$timestamp/
+    cp /etc/nginx/sites-enabled/* /opt/emol_backup/configs_$timestamp/
+    cp /etc/init.d/emol /opt/emol_backup/configs_$timestamp/
+}
+
 # Parse arguments
 DRY_RUN=false
 CHECK_ONLY=false
@@ -226,6 +242,9 @@ pre_deploy_checks
 # Create backup
 backup_current
 
+# Add to main sequence before any changes
+backup_configs
+
 if [ -n "$FORCE_VERSION" ]; then
     VERSION_TO_DEPLOY=$FORCE_VERSION
 else
@@ -242,6 +261,9 @@ if [ "$DRY_RUN" = true ]; then
     exit 0
 fi
 
+# Add to main sequence before service restart
+check_configs
+
 # Perform deployment
 deploy
 
@@ -251,4 +273,7 @@ git tag -a "$DEPLOY_TAG" -m "Deployed $VERSION_TO_DEPLOY"
 git push origin "$DEPLOY_TAG"
 
 echo -e "${GREEN}Successfully deployed version $VERSION_TO_DEPLOY${RESET}"
-echo -e "${GREEN}Deployment tag pushed: ${DEPLOY_TAG}${RESET}" 
+echo -e "${GREEN}Deployment tag pushed: ${DEPLOY_TAG}${RESET}"
+
+# Add trap
+trap rollback ERR 

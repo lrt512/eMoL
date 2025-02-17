@@ -193,15 +193,9 @@ cleanup_build() {
 
 environment_specific_setup() {
     if [ "$is_dev" = true ]; then
-        # We'll also need to create a .env_dev file so we can get the
-        # environment variables for the dev environment in the init script
-        # output_file="/opt/emol/.env_dev"
-        # env_vars="DJANGO_SETTINGS_MODULE DB_HOST DB_NAME DB_USER DB_PASSWORD"
-        # echo "" > $output_file
-        # for var in $env_vars; do
-        #     echo "export $var=${!var}" >> $output_file
-        # done
-
+        echo "Setting up development environment..."
+        
+        # Set up AWS SSM parameters for development
         aws ssm put-parameter --name "/emol/django_settings_module" --value "emol.settings.dev" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
         aws ssm put-parameter --name "/emol/oauth_client_id" --value "mock-client-id" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
         aws ssm put-parameter --name "/emol/oauth_client_secret" --value "mock-client-secret" --type "SecureString" --endpoint-url "http://localstack:4566" --overwrite
@@ -488,3 +482,17 @@ setup_services() {
 # In the main sequence
 progress $((++CURRENT_STEP)) "Setting up services"
 setup_services
+
+configure_settings() {
+    echo -e "\nConfiguring settings..."
+    
+    # Ensure we're using dev.py in development
+    if [ "$is_dev" = true ]; then
+        echo "Using development settings (dev.py)"
+        export DJANGO_SETTINGS_MODULE=emol.settings.dev
+    fi
+}
+
+# Add to the main sequence
+progress $((++CURRENT_STEP)) "Configuring settings"
+configure_settings
